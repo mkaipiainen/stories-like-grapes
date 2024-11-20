@@ -1,0 +1,21 @@
+services:
+  api:
+    image: ghcr.io/mkaipiainen/calendar-api:latest
+    networks:
+      - app-network
+  frontend:
+    image: ghcr.io/mkaipiainen/calendar-frontend:latest
+    networks:
+      - app-network
+  caddy:
+    image: ghcr.io/mkaipiainen/calendar-revproxy:latest
+    container_name: oad.caddy.dev
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+
+
+networks:
+  app-network:

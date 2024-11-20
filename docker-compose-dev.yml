@@ -1,0 +1,53 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./api/.env
+    volumes:
+      - ./api/src:/app/src
+    environment:
+      - PORT=80
+    networks:
+      - app-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    networks:
+      - app-network
+  caddy:
+    image: caddy:2
+    container_name: caddy.dev
+    ports:
+      - "80:80"
+      - "4200:4200"
+      - "443:443"
+    volumes:
+      - ./revproxy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    networks:
+      - app-network
+  db:
+    image: postgres:17.1
+    container_name: postgres.dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+      POSTGRES_DB: storieslikegrapes
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+

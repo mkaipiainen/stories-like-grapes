@@ -1,0 +1,4 @@
+node_modules
+.quasar
+e2e
+spec.ts

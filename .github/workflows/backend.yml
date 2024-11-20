@@ -1,0 +1,78 @@
+name: Build and Push Docker Image
+
+permissions:
+  contents: 'read'
+  packages: 'write'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - api/**
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/calendar-api:latest
+          file: ./api/Dockerfile
+          build-args: |
+            AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
+            AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |
+            AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} |
+            AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
+
+      - name: Get and store Droplet IP
+        run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
+
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{env.DROPLET_IP}} >> ~/.ssh/known_hosts
+
+
+      - name: Deploy to DigitalOcean Droplet
+        run: |
+          doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
+          docker rm -f calendar-api
+          docker pull ghcr.io/${{ github.repository_owner }}/calendar-api:latest
+          docker run -p 8051:80 -d --name calendar-api --network app-default ghcr.io/${{ github.repository_owner }}/calendar-api:latest 
+          EOF
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DOCKER_IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
+          DOCKER_IMAGE_API: ghcr.io/${{ github.repository_owner }}/calendar-api:latest
+          DOCKER_IMAGE_REVPROXY: ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest
+        # Replace <droplet-name-or-ip>, <your-ssh-user>, and <commands> with your actual values

@@ -1,0 +1,12 @@
+{
+  "exclude": [],
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
+    "esModuleInterop": true,
+    "lib": ["EsNext", "dom", "dom.iterable"],
+    "types": ["node", "jsdom"],
+    "module": "esnext"
+  },
+  "files": ["./vite.config.ts", "vitest.config.ts"]
+}

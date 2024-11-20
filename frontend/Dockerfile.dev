@@ -1,0 +1,12 @@
+FROM node:22.2.0
+
+WORKDIR /app
+RUN npm install -g pnpm@9.7.0
+
+COPY .npmrc .
+COPY package.json .
+COPY pnpm-lock.yaml .
+RUN pnpm install
+COPY . .
+CMD ["pnpm", "dev"]
+
