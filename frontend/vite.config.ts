@@ -18,4 +18,7 @@ export default defineConfig({
       '@store': fileURLToPath(new URL('./src/stores', import.meta.url)),
     },
   },
+  build: {
+    commonjsOptions: { transformMixedEsModules: true },
+  },
 });
