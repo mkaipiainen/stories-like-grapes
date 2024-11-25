@@ -1,42 +1,28 @@
-let express = require("express")
-let { createHandler } = require("graphql-http/lib/use/express")
-let { buildSchema } = require("graphql")
-const { ruruHTML } = require("ruru/server")
-const pg = require('pg');
-import resolvers from './resolvers';
+import { createYoga } from 'graphql-yoga';
+import { schema } from './schema';
+import express from 'express';
+import { expressjwt, GetVerificationKey } from 'express-jwt';
+import { expressJwtSecret } from 'jwks-rsa';
+const app = express();
+const yoga = createYoga({ schema })
 
-
-
-const pgpool = new pg.Pool({ database: 'plantminder' });
-
-let schema = buildSchema(`
-  type Query {
-    hello: String
-  }
-`)
-
-// The root provides a resolver function for each API endpoint
-let root = {
-  hello() {
-    return "Hello world!"
+export const secured = (req: any, res: any, next: any) => expressjwt({
+  secret: expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 1,
+    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+  }) as GetVerificationKey,
+  getToken: (req: any) => {
+    return req.headers.authorization.replace('Bearer ', '');
   },
-}
+  audience: process.env.AUTH0_AUDIENCE,
+  algorithms: ['RS256'],
+})(req, res, next) as Promise<void>
 
-let app = express()
-app.use(express.json())
+app.use('/graphql', secured, yoga)
 
-// Create and use the GraphQL handler.
-app.all(
-  "/graphql",
-  createHandler({
-    schema: schema,
-    rootValue: root,
-  })
-)
-// Serve the GraphiQL IDE.
-app.get("/graphql/ruru", (_req: any, res: any) => {
-  res.type("html")
-  res.end(ruruHTML({ endpoint: "/graphql" }))
+
+app.listen(80, () => {
+  console.info('Server is running on http://localhost:4200/graphql')
 })
-// Start the server at port
-app.listen(80)

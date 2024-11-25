@@ -26,5 +26,6 @@ ENV AUTH0_ISSUER=$AUTH0_ISSUER
 # Set default NODE_ENV for local development
 ENV NODE_ENV=development
 
+
 # Command to run the app
 CMD ["pnpm", "run", "dev"]
