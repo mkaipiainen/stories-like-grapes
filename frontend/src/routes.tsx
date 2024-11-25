@@ -44,13 +44,11 @@ export const Auth0ProviderWithNavigate: FC<{ children: any }> = ({
   const clientId = isProduction
     ? 'vlPaAflsi4YGyYO7ssyEnjrQxvo4GtDs'
     : 'lqTQ2LfvM5yyicwSy5mCq6nPiVBWSPM7';
-  const redirectUri = 'http://localhost:4200';
+  const redirectUri = window.location.origin;
 
   const onRedirectCallback = (appState: any) => {
-    console.log('REDIRECT', appState);
     navigate(appState?.returnTo || window.location.pathname);
   };
-  console.log('AUTH0 AUDIENCE', import.meta.env.VITE_AUTH0_AUDIENCE);
 
   return (
     <Auth0Provider
