@@ -45,6 +45,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
           file: ./frontend/Dockerfile
+        env:
+          VITE_AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
 
       - name: Get and store Droplet IP
         run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
