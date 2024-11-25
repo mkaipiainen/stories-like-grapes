@@ -8,6 +8,7 @@ import {
 } from '@auth0/auth0-react';
 import { ComponentType, FC } from 'react';
 import { LoadingOverlay } from '@mantine/core';
+import { ApolloProviderWithAuth0 } from '@/apollo.tsx';
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -18,7 +19,6 @@ const AuthenticationGuard: FC<AuthenticationGuardProps> = ({
   ...props
 }) => {
   const { isLoading, isAuthenticated } = useAuth0();
-  console.log('HELLO', isLoading, isAuthenticated);
   if (isLoading) {
     return (
       <LoadingOverlay
@@ -50,6 +50,7 @@ export const Auth0ProviderWithNavigate: FC<{ children: any }> = ({
     console.log('REDIRECT', appState);
     navigate(appState?.returnTo || window.location.pathname);
   };
+  console.log('AUTH0 AUDIENCE', import.meta.env.VITE_AUTH0_AUDIENCE);
 
   return (
     <Auth0Provider
@@ -57,6 +58,7 @@ export const Auth0ProviderWithNavigate: FC<{ children: any }> = ({
       clientId={clientId}
       authorizationParams={{
         redirect_uri: redirectUri,
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       }}
       onRedirectCallback={onRedirectCallback}
     >
@@ -70,7 +72,9 @@ export const routes: RemixRouter = createBrowserRouter([
     path: '',
     element: (
       <Auth0ProviderWithNavigate>
-        <Outlet />
+        <ApolloProviderWithAuth0>
+          <Outlet />
+        </ApolloProviderWithAuth0>
       </Auth0ProviderWithNavigate>
     ),
     errorElement: (

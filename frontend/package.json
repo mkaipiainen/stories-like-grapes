@@ -8,9 +8,11 @@
     "build": "vite build",
     "tsc": "tsc -b",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "codegen": "graphql-codegen --config codegen.ts --watch"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.10",
     "@auth0/auth0-react": "^2.2.4",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -30,6 +32,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "eslint-config-prettier": "^9.1.0",
+    "graphql-request": "^7.1.2",
     "lucide-react": "^0.456.0",
     "quill": "^2.0.2",
     "rambda": "^9.3.0",
@@ -47,6 +50,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@graphql-codegen/cli": "5.0.3",
+    "@graphql-codegen/client-preset": "4.5.0",
+    "@graphql-codegen/introspection": "4.0.3",
+    "@parcel/watcher": "^2.5.0",
     "@playwright/test": "^1.48.2",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",

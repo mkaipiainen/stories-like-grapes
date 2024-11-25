@@ -2,17 +2,14 @@ import { useQuill } from 'react-quilljs';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/store.ts';
-import {
-  setDescription,
-  setStep,
-  setTags,
-} from '@store/slices/new-plant-slice.ts';
+import { setDescription, setTags } from '@store/slices/new-plant-slice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
   Button,
   Chip,
   Group,
+  LoadingOverlay,
   Modal,
   MultiSelect,
   MultiSelectProps,
@@ -24,6 +21,8 @@ import { faCloud } from '@fortawesome/free-solid-svg-icons';
 import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
 import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { graphql } from '@/gql';
+import { useMutation } from '@apollo/client';
 type Inputs = {
   description: string;
 };
@@ -51,11 +50,25 @@ const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
   TAGS,
 ) as unknown as (keyof typeof TAGS)[];
 
+const CREATE_PLANT = graphql(/* GraphQL */ `
+  mutation CreatePlant($name: String!, $description: String, $tags: [String]) {
+    createPlant(name: $name, description: $description, tags: $tags) {
+      name
+      description
+      tags
+    }
+  }
+`);
 export function NewPlantFormStep3() {
   const [opened, { open, close }] = useDisclosure(false);
+  const [mutateFunction, { data, loading, error }] = useMutation(CREATE_PLANT);
 
   const { quill, quillRef } = useQuill();
   const tags = useAppSelector((state) => state.newPlantReducer.tags);
+  const name = useAppSelector((state) => state.newPlantReducer.name);
+  const description = useAppSelector(
+    (state) => state.newPlantReducer.description,
+  );
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
   const [temporaryTags, setTemporaryTags] = useState<string[]>([]);
@@ -73,7 +86,13 @@ export function NewPlantFormStep3() {
   }, [quill]);
 
   function onSubmit() {
-    dispatch(setStep(3));
+    mutateFunction({
+      variables: {
+        name,
+        description,
+        tags,
+      },
+    });
   }
 
   function acceptTags(selectedTags: string[]) {
@@ -101,6 +120,16 @@ export function NewPlantFormStep3() {
       onSubmit={handleSubmit(onSubmit)}
       className={'flex flex-col items-start'}
     >
+      {loading ? (
+        <LoadingOverlay
+          visible={true}
+          zIndex={1000}
+          overlayProps={{ radius: 'lg', blur: 2 }}
+          pos={'absolute'}
+        ></LoadingOverlay>
+      ) : (
+        <></>
+      )}
       <div className={'flex flex-col'}>
         <Button onClick={open}>Add some tags</Button>
         <Modal opened={opened} onClose={close} title="Add tags">
