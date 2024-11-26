@@ -62,8 +62,10 @@ jobs:
       - name: Deploy to DigitalOcean Droplet
         run: |
           doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          echo "${{ secrets.PERSONAL_ACCESS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
           docker rm -f calendar-revproxy
+          docker rmi ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest
           docker run -d --name calendar-revproxy -p 80:80 -p 443:443 --network app-default ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest 
           EOF
