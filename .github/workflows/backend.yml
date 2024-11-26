@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - api/**
+      - .github/workflows/backend.yml
 
 jobs:
   build-and-deploy:

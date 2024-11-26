@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - revproxy/**
+      - .github/workflows/revproxy.yml
 
 jobs:
   build-and-deploy:
