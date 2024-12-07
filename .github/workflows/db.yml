@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - api/src/db/**
+      - .github/workflows/db.yml
 
 jobs:
   deploy:
