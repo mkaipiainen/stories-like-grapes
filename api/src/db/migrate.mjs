@@ -34,12 +34,14 @@ async function migrateToLatest() {
   })
 
   const { error, results } = await migrator.migrateToLatest()
-  console.log("Migration results:");
+  console.log("Migration results:", results.length);
   results?.forEach((it) => {
     if (it.status === 'Success') {
       console.log(`migration "${it.migrationName}" was executed successfully`)
     } else if (it.status === 'Error') {
       console.error(`failed to execute migration "${it.migrationName}"`)
+    } else {
+      console.error(`migration "${it.migrationName}" has undetermined status`)
     }
   })
 
@@ -48,7 +50,7 @@ async function migrateToLatest() {
     console.error(error)
     process.exit(1)
   }
-
+  console.log("Succesfully ran all migrations");
   await db.destroy()
   process.exit(0)
 }
