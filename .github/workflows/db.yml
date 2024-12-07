@@ -100,7 +100,7 @@ jobs:
           docker rm -f slg-db-migrations
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
-          docker run --network app-default --rm --name slg-db-migrations \
+          docker run --network app-default --rm --restart unless-stopped --name slg-db-migrations \
           -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public \
           ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
           EOF

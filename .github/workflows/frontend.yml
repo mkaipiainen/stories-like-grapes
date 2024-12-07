@@ -68,7 +68,7 @@ jobs:
           docker rm -f calendar-frontend
           docker rmi ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
-          docker run -d -p 8050:80 --name calendar-frontend --network app-default ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest 
+          docker run --restart unless-stopped -d -p 8050:80 --name calendar-frontend --network app-default ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest 
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
