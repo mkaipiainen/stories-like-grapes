@@ -1,0 +1,102 @@
+name: Build and Push Docker Image
+
+permissions:
+  contents: 'read'
+  packages: 'write'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - api/src/db
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Get and store Droplet IP
+        run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
+
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{env.DROPLET_IP}} >> ~/.ssh/known_hosts
+
+      - name: Deploy to DigitalOcean Droplet
+        run: |
+          doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
+          docker rm -f slg-db
+          docker rmi ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest || true
+          docker pull ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
+          docker run -d --name slg-db \
+          -e POSTGRES_USER=postgres \
+          -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          -e POSTGRES_DB=storieslikegrapes \
+          -v db-data:/var/lib/postgresql/data \
+          --network app-network \
+          postgres:17.1
+          EOF
+
+  migrations:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Build and push migration image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
+          file: ./api/Dockerfile.db-migrations
+
+      - name: Get and store Droplet IP
+        run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
+
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{env.DROPLET_IP}} >> ~/.ssh/known_hosts
+
+      - name: Deploy to DigitalOcean Droplet
+        run: |
+          doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
+          docker rm -f slg-db-migrations
+          docker rmi ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest || true
+          docker pull ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
+          docker run --network app-default --rm --name slg-db-migrations \
+          -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public \
+          ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
+          EOF
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

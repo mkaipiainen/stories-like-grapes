@@ -11,18 +11,18 @@ import { dirname } from 'path';
 import { TSFileMigrationProvider } from 'kysely-ctl';
 
 async function migrateToLatest() {
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
 
   const db = new Kysely({
     dialect: new PostgresDialect({
       pool: new pg.Pool({
-        connectionString: 'postgresql://postgres@localhost:5433/storieslikegrapes?schema=public',
+        connectionString: process.env.CONNECTION_STRING || 'postgresql://postgres@localhost:5433/storieslikegrapes?schema=public',
       })
     }),
   })
 
-  console.log(__dirname);
   const migrator = new Migrator({
     db,
     provider: new TSFileMigrationProvider({
