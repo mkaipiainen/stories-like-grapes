@@ -1,15 +1,19 @@
 import { useQuill } from 'react-quilljs';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/store.ts';
-import { setDescription, setTags } from '@store/slices/new-plant-slice.ts';
+import {
+  setDescription,
+  setStep,
+  setTags,
+} from '@store/slices/new-plant-slice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
   Button,
   Chip,
   Group,
-  LoadingOverlay,
+  Notification,
   Modal,
   MultiSelect,
   MultiSelectProps,
@@ -22,6 +26,9 @@ import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
 import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { trpc } from '@/util/trpc.ts';
+import { useDissolve } from '@/hooks/dissolve/use-dissolve.tsx';
+import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import { notifications } from '@mantine/notifications';
 type Inputs = {
   description: string;
 };
@@ -58,9 +65,11 @@ export function NewPlantFormStep3() {
   const description = useAppSelector(
     (state) => state.newPlantReducer.description,
   );
+  const step3 = useRef<HTMLFormElement | null>(null);
   const wateringFrequency = useAppSelector(
     (state) => state.newPlantReducer.wateringFrequency,
   );
+  const dissolve = useDissolve();
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
   const [temporaryTags, setTemporaryTags] = useState<string[]>([]);
@@ -78,15 +87,37 @@ export function NewPlantFormStep3() {
   }, [quill]);
 
   function onSubmit() {
-    mutation.mutate({
-      name,
-      description,
-      watering_frequency:
-        typeof wateringFrequency === 'string'
-          ? parseInt(wateringFrequency)
-          : wateringFrequency,
-      tags,
-    });
+    mutation
+      .mutateAsync({
+        name,
+        description,
+        watering_frequency:
+          typeof wateringFrequency === 'string'
+            ? parseInt(wateringFrequency)
+            : wateringFrequency,
+        tags,
+      })
+      .then(() => {
+        notifications.show({
+          title: 'Success!',
+          message: 'Added a new plant!',
+          color: 'green',
+          position: 'top-center',
+          icon: (
+            <FontAwesomeIcon color={'white'} icon={faCheck}></FontAwesomeIcon>
+          ),
+          autoClose: 2000,
+        });
+        setTimeout(() => {
+          dissolve({
+            duration: 500,
+            element: step3.current as HTMLElement,
+            removeFromFlow: true,
+          }).then(() => {
+            dispatch(setStep(1));
+          });
+        }, 1000);
+      });
   }
 
   function acceptTags(selectedTags: string[]) {
@@ -112,17 +143,8 @@ export function NewPlantFormStep3() {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className={'flex flex-col items-start'}
+      ref={step3}
     >
-      {mutation.isLoading ? (
-        <LoadingOverlay
-          visible={true}
-          zIndex={1000}
-          overlayProps={{ radius: 'lg', blur: 2 }}
-          pos={'absolute'}
-        ></LoadingOverlay>
-      ) : (
-        <></>
-      )}
       <div className={'flex flex-col'}>
         <Button onClick={open}>Add some tags</Button>
         <Modal opened={opened} onClose={close} title="Add tags">
@@ -172,6 +194,7 @@ export function NewPlantFormStep3() {
         className={
           'hover:bg-primary-800 transition-colors cursor-pointer w-full mt-4'
         }
+        disabled={mutation.isLoading}
         variant="outline"
         size="icon"
       >

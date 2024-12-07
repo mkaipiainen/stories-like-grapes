@@ -20,14 +20,11 @@ export function NewPlantForm() {
       .with(1, () => {
         return (
           <div className={'h-full w-full flex items-center justify-center'}>
-            <div
-              ref={step1}
-              className={' transition-opacity duration-1000 z-10'}
-            >
-              <NewPlantFormStep1 />
-            </div>
             <div className={'opacity-0 absolute z-0'} ref={step2}>
               <NewPlantFormStep2 />
+            </div>
+            <div ref={step1} className={'z-10 step1'}>
+              <NewPlantFormStep1 />
             </div>
           </div>
         );
@@ -38,10 +35,7 @@ export function NewPlantForm() {
             <div className={'opacity-0 absolute z-0'} ref={step1}>
               <NewPlantFormStep1 />
             </div>
-            <div
-              ref={step2}
-              className={' transition-opacity duration-1000 z-10'}
-            >
+            <div ref={step2} className={'z-10 step2'}>
               <NewPlantFormStep2 />
             </div>
           </div>
@@ -53,10 +47,7 @@ export function NewPlantForm() {
             <div className={'opacity-0 absolute z-0'} ref={step2}>
               <NewPlantFormStep2 />
             </div>
-            <div
-              ref={step3}
-              className={' transition-opacity duration-1000 z-10'}
-            >
+            <div ref={step3} className={'z-10 step3'}>
               <NewPlantFormStep3 />
             </div>
           </div>
@@ -69,53 +60,53 @@ export function NewPlantForm() {
     if (step === currentStep) {
       return;
     }
-    match(step)
-      .with(1, () => {
-        if (step2.current) {
-          step2.current.style.opacity = '1';
-          dissolve({
-            duration: 500,
-            element: step2.current,
-            removeFromFlow: true,
-          }).then(() => {
-            setCurrentStep(step);
-          });
-        }
-        if (step1.current) {
-          step1.current.style.opacity = '1';
-        }
-      })
-      .with(2, () => {
-        if (step1.current) {
-          step1.current.style.opacity = '1';
-          dissolve({
-            element: step1.current,
-            duration: 500,
-            removeFromFlow: true,
-          }).then(() => {
-            setCurrentStep(step);
-          });
-        }
-        if (step2.current) {
-          step2.current.style.opacity = '1';
-        }
-      })
-      .with(3, () => {
-        if (step2.current) {
-          step2.current.style.opacity = '1';
-          dissolve({
-            element: step2.current,
-            duration: 500,
-            removeFromFlow: true,
-          }).then(() => {
-            setCurrentStep(step);
-          });
-        }
-        if (step3.current) {
-          step3.current.style.opacity = '1';
-        }
-      })
+    const targetRef = match(step)
+      .with(1, () => step1)
+      .with(2, () => step2)
+      .with(3, () => step3)
       .exhaustive();
+    const sourceRef = match(currentStep)
+      .with(1, () => step1)
+      .with(2, () => step2)
+      .with(3, () => step3)
+      .exhaustive();
+    const DURATION = 1000;
+
+    if (targetRef.current) {
+      targetRef.current.style.opacity = '0';
+      setTimeout(() => {
+        if (targetRef.current) {
+          targetRef.current.style.transition = `opacity ${DURATION * 1.5}ms`;
+          targetRef.current.style.opacity = '1';
+
+          setTimeout(() => {
+            if (targetRef.current) {
+              targetRef.current.style.transition = '';
+            }
+          }, DURATION * 1.5);
+        }
+      });
+    }
+    if (sourceRef.current) {
+      sourceRef.current.style.opacity = '1';
+      const targetColorMatrix =
+        currentStep === 3
+          ? {
+              r: [0, 0, 0, 0, 0],
+              g: [1, 1, 1, 1, 1],
+              b: [0, 0, 0, 0, 0],
+              a: [0, 0, 0, 1, 0],
+            }
+          : undefined;
+      dissolve({
+        duration: DURATION,
+        element: sourceRef.current,
+        removeFromFlow: true,
+        targetColorMatrix: targetColorMatrix,
+      }).then(() => {
+        setCurrentStep(step);
+      });
+    }
   }, [dissolve, step, currentStep]);
 
   return (
