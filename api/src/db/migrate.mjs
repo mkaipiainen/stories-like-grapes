@@ -11,7 +11,7 @@ import { dirname } from 'path';
 import { TSFileMigrationProvider } from 'kysely-ctl';
 
 async function migrateToLatest() {
-
+  console.log("Starting migrations...");
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
 
@@ -34,7 +34,7 @@ async function migrateToLatest() {
   })
 
   const { error, results } = await migrator.migrateToLatest()
-
+  console.log("Migration results:");
   results?.forEach((it) => {
     if (it.status === 'Success') {
       console.log(`migration "${it.migrationName}" was executed successfully`)
