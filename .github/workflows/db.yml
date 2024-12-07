@@ -96,13 +96,14 @@ jobs:
       - name: Deploy to DigitalOcean Droplet
         run: |
           doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          set -e
           docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
           docker rm -f slg-db-migrations
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
           docker run --network app-default --rm --name slg-db-migrations \
           -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public \
-          ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
+          ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest | tee /tmp/migration.log
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

@@ -50,6 +50,7 @@ async function migrateToLatest() {
   }
 
   await db.destroy()
+  process.exit(0)
 }
 
 migrateToLatest()
