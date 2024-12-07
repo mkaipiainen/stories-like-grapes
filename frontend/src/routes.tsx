@@ -8,7 +8,7 @@ import {
 } from '@auth0/auth0-react';
 import { ComponentType, FC } from 'react';
 import { LoadingOverlay } from '@mantine/core';
-import { ApolloProviderWithAuth0 } from '@/apollo.tsx';
+import { Layout } from '@/layout.tsx';
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -70,9 +70,9 @@ export const routes: RemixRouter = createBrowserRouter([
     path: '',
     element: (
       <Auth0ProviderWithNavigate>
-        <ApolloProviderWithAuth0>
+        <Layout>
           <Outlet />
-        </ApolloProviderWithAuth0>
+        </Layout>
       </Auth0ProviderWithNavigate>
     ),
     errorElement: (

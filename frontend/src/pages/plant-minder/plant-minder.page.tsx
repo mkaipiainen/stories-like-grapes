@@ -1,25 +1,25 @@
 import { NewPlantForm } from '@/pages/plant-minder/components/new-plant-form.tsx';
-import { graphql } from '@/gql';
-import { useQuery } from '@apollo/client';
-
-const GET_PLANTS = graphql(/* GraphQL */ `
-  query Plants {
-    Plants {
-      id
-      name
-      wateringInterval
-      lastWatered
-      tags
-    }
-  }
-`);
+import { trpc } from '@/util/trpc.ts';
+import { LoadingOverlay } from '@mantine/core';
 
 export function PlantMinderPage() {
-  const { loading, error, data } = useQuery(GET_PLANTS);
-
+  const { isLoading, data } = trpc.plant.list.useQuery();
   return (
-    <div className={'flex flex-col h-full w-full'}>
-      <NewPlantForm></NewPlantForm>
-    </div>
+    <>
+      {isLoading ? (
+        <LoadingOverlay
+          visible={true}
+          zIndex={1000}
+          overlayProps={{ radius: 'lg', blur: 2 }}
+          pos={'absolute'}
+        ></LoadingOverlay>
+      ) : (
+        <></>
+      )}
+      <pre>{data?.map((datum) => datum.name)}</pre>
+      <div className={'flex flex-col h-full w-full'}>
+        <NewPlantForm></NewPlantForm>
+      </div>
+    </>
   );
 }

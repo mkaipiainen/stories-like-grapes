@@ -21,8 +21,7 @@ import { faCloud } from '@fortawesome/free-solid-svg-icons';
 import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
 import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { graphql } from '@/gql';
-import { useMutation } from '@apollo/client';
+import { trpc } from '@/util/trpc.ts';
 type Inputs = {
   description: string;
 };
@@ -50,24 +49,17 @@ const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
   TAGS,
 ) as unknown as (keyof typeof TAGS)[];
 
-const CREATE_PLANT = graphql(/* GraphQL */ `
-  mutation CreatePlant($name: String!, $description: String, $tags: [String]) {
-    createPlant(name: $name, description: $description, tags: $tags) {
-      name
-      description
-      tags
-    }
-  }
-`);
 export function NewPlantFormStep3() {
   const [opened, { open, close }] = useDisclosure(false);
-  const [mutateFunction, { data, loading, error }] = useMutation(CREATE_PLANT);
-
+  const mutation = trpc.plant.create.useMutation();
   const { quill, quillRef } = useQuill();
   const tags = useAppSelector((state) => state.newPlantReducer.tags);
   const name = useAppSelector((state) => state.newPlantReducer.name);
   const description = useAppSelector(
     (state) => state.newPlantReducer.description,
+  );
+  const wateringFrequency = useAppSelector(
+    (state) => state.newPlantReducer.wateringFrequency,
   );
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
@@ -86,17 +78,18 @@ export function NewPlantFormStep3() {
   }, [quill]);
 
   function onSubmit() {
-    mutateFunction({
-      variables: {
-        name,
-        description,
-        tags,
-      },
+    mutation.mutate({
+      name,
+      description,
+      watering_frequency:
+        typeof wateringFrequency === 'string'
+          ? parseInt(wateringFrequency)
+          : wateringFrequency,
+      tags,
     });
   }
 
   function acceptTags(selectedTags: string[]) {
-    console.log(selectedTags);
     dispatch(setTags([...selectedTags]));
     setTemporaryTags([]);
     close();
@@ -120,7 +113,7 @@ export function NewPlantFormStep3() {
       onSubmit={handleSubmit(onSubmit)}
       className={'flex flex-col items-start'}
     >
-      {loading ? (
+      {mutation.isLoading ? (
         <LoadingOverlay
           visible={true}
           zIndex={1000}

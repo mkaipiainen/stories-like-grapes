@@ -9,6 +9,8 @@ services:
       - ./api/src:/app/src
     environment:
       - PORT=80
+    ports:
+      - "3000:80"
     networks:
       - app-network
   frontend:
