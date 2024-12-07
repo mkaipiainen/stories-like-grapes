@@ -2,11 +2,7 @@ FROM node:22
 
 
 WORKDIR /app
-COPY package.json .
-COPY .npmrc .
-COPY src/db/migrate.mjs .
-COPY src/db/migrations .
-COPY src/db/seeds .
+COPY . .
 RUN npm install -g pnpm@latest
 RUN pnpm install
 CMD ["node", "migrate.mjs"]
