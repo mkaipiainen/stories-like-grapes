@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - api/src/db
+      - api/src/db/**
 
 jobs:
   deploy:
