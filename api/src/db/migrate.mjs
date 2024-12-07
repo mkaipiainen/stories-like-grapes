@@ -32,7 +32,7 @@ async function migrateToLatest() {
       migrationFolder: path.join(__dirname, 'migrations'),
     }),
   })
-
+  console.log('Using migration folder:', path.join(__dirname, 'migrations'));
   const { error, results } = await migrator.migrateToLatest()
   console.log("Migration results:", results.length);
   results?.forEach((it) => {
