@@ -7,10 +7,19 @@ export type DissolveProps = {
   duration: number;
   rootElement: HTMLElement;
   id: string;
+  targetColorMatrix?: {
+    r: [number, number, number, number, number];
+    g: [number, number, number, number, number];
+    b: [number, number, number, number, number];
+    a: [number, number, number, number, number];
+  };
 };
 export function Dissolve(props: DissolveProps) {
   const seed = useRef<number>(Math.floor(Math.random() * 1000));
   const [scale, setScale] = useState(1);
+  const [colorMatrix, setColorMatrix] = useState(
+    '1 0 0 0 0 ' + '0 1 0 0 0 ' + '0 0 1 0 0 ' + '0 0 0 1 0',
+  );
   const startTime = performance.now();
   const FADE_START = 0.3;
   const rootElement = useRef<HTMLElement>(props.rootElement);
@@ -30,11 +39,39 @@ export function Dissolve(props: DissolveProps) {
       0,
       (progress - FADE_START) / (1 - FADE_START),
     );
-    console.log(opacityProgress);
     rootElement.current.style.opacity = `${1 - opacityProgress}`;
+    const newMatrix = getTargetColorMatrix(progress);
+    setColorMatrix(newMatrix);
     if (progress < 1) {
       requestAnimationFrame(animate);
     }
+  }
+
+  function getTargetColorMatrix(progress: number) {
+    if (!props.targetColorMatrix) {
+      return '1 0 0 0 0 ' + '0 1 0 0 0 ' + '0 0 1 0 0 ' + '0 0 0 1 0';
+    }
+    const defaultMatrix = {
+      r: [1, 0, 0, 0, 0],
+      g: [0, 1, 0, 0, 0],
+      b: [0, 0, 1, 0, 0],
+      a: [0, 0, 0, 1, 0],
+    };
+
+    const targetMatrix = props.targetColorMatrix || defaultMatrix;
+
+    // Interpolate each channel
+    const interpolate = (from: number[], to: number[]) =>
+      from.map((f, i) => f + (to[i] - f) * progress);
+
+    const r = interpolate(defaultMatrix.r, targetMatrix.r);
+    const g = interpolate(defaultMatrix.g, targetMatrix.g);
+    const b = interpolate(defaultMatrix.b, targetMatrix.b);
+    const a = interpolate(defaultMatrix.a, targetMatrix.a);
+
+    // Combine into a string
+    console.log(r, g, b, a);
+    return [...r, ...g, ...b, ...a].join(' ');
   }
 
   return (
@@ -86,6 +123,7 @@ export function Dissolve(props: DissolveProps) {
             <feMergeNode in="bigNoiseAdjusted" />
             <feMergeNode in="fineNoise" />
           </feMerge>
+
           {/*Displacement Map*/}
           <feDisplacementMap
             in="SourceGraphic"
@@ -93,6 +131,12 @@ export function Dissolve(props: DissolveProps) {
             scale={scale}
             xChannelSelector="R"
             yChannelSelector="G"
+            result="displacedGraphic"
+          />
+          <feColorMatrix
+            in="displacedGraphic"
+            type="matrix"
+            values={colorMatrix}
           />
         </filter>
       </defs>

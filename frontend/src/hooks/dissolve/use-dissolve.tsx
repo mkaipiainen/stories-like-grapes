@@ -9,6 +9,12 @@ export function useDissolve() {
     element: HTMLElement;
     duration?: number;
     removeFromFlow?: boolean;
+    targetColorMatrix?: {
+      r: number[];
+      g: number[];
+      b: number[];
+      a: number[];
+    };
   }) {
     if (dissolves.has(options.element.id)) {
       return new Promise<void>((resolve) => {
@@ -39,6 +45,7 @@ export function useDissolve() {
           width={boundingBox.width}
           height={boundingBox.height}
           seed={Math.random() * 10000}
+          targetColorMatrix={options.targetColorMatrix}
           duration={duration}
           rootElement={options.element}
           id={id}
