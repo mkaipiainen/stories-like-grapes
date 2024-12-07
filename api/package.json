@@ -17,7 +17,6 @@
     "@trpc/server": "^10.45.2",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.37.0",
     "express": "^4.21.0",
     "express-jwt": "^8.4.1",
     "express-jwt-authz": "^2.4.1",
