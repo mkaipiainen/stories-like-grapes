@@ -1,7 +1,7 @@
 @import 'quill/dist/quill.snow.css';
 @import '@mantine/core/styles.css';
 @import './themes/default.css';
-
+@import '@mantine/notifications/styles.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

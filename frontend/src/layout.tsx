@@ -6,6 +6,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Provider } from 'react-redux';
 import { store } from '@store/store.ts';
 import { createTheme, MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 const theme = createTheme({
   /** Put your mantine theme override here */
 });
@@ -31,6 +32,7 @@ export const Layout: FC<{ children: any }> = ({ children }) => {
   return (
     <Provider store={store}>
       <MantineProvider theme={theme}>
+        <Notifications />
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             {children}
