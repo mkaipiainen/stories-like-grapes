@@ -3,7 +3,7 @@ import { Kysely, PostgresDialect } from 'kysely';
 import { Database } from './types/database';
 const dialect = new PostgresDialect({
   pool: new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.CONNECTION_STRING,
   })
 })
 
