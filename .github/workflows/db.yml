@@ -48,7 +48,7 @@ jobs:
           -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
           -e POSTGRES_DB=storieslikegrapes \
           -v db-data:/var/lib/postgresql/data \
-          --network app-network \
+          --network app-default \
           postgres:17.1
           EOF
 
