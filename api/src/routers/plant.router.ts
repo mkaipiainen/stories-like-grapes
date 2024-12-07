@@ -22,16 +22,23 @@ export default router({
         description: options.input.description,
         watering_frequency: options.input.watering_frequency,
       }).returningAll().execute())[0];
-
-      await db.insertInto('plant_tag').values(options.input.tags.map(tag => {
+      if(options.input.tags.length) {
+        await db.insertInto('plant_tag').values(options.input.tags.map(tag => {
+          return {
+            plant_id: plant.id,
+            name: tag,
+          }
+        })).execute();
         return {
-          plant_id: plant.id,
-          name: tag,
+          ...plant,
+          tags: options.input.tags,
         }
-      })).execute();
-      return {
-        ...plant,
-        tags: options.input.tags,
+      } else {
+        return {
+          ...plant,
+          tags: [],
+        }
       }
+
     }),
 });
