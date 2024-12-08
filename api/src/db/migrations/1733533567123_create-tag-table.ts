@@ -1,20 +1,23 @@
 import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
-	// up migration code goes here...
-	// note: up migrations are mandatory. you must implement this function.
-	// For more info, see: https://kysely.dev/docs/migrations
-  db.schema.createTable('plant_tag')
+  await db.schema.createTable('tag')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('name', 'varchar', (col) => col.notNull())
-    .addColumn('plant_id', 'uuid', (col) => col.references('plant.id').notNull())
+    .addColumn('entity_type', 'varchar')
+    .addColumn('entity_id', 'uuid')
+    .addColumn('name', 'varchar')
     .addColumn('date_created', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .execute()
+
+  await db.schema.createIndex('tag_entity_type_entity_id_name_index').on('tag').columns([
+    'entity_id',
+    'entity_type'
+  ]).execute();
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
 	// down migration code goes here...
 	// note: down migrations are optional. you can safely delete this function.
 	// For more info, see: https://kysely.dev/docs/migrations
-  db.schema.dropTable('plant_tag').execute();
+  await db.schema.dropTable('tag').execute();
 }

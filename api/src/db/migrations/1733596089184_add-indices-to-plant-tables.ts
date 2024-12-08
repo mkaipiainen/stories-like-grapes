@@ -10,7 +10,8 @@ create index plant_id_index
 
 create index plant_last_watered_index
     on plant (last_watered);
-
+create index plant_watering_deleted_index
+	on plant (deleted);
 create index plant_watering_frequency_index
     on plant (watering_frequency);
 `))
