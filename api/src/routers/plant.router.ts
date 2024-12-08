@@ -2,15 +2,24 @@ import { publicProcedure, router } from '../trpc';
 import { z } from 'zod';
 import { db } from '../db/db';
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
+import { EntityService } from '../services/delete.service';
+import { ENTITY_TYPE } from '../constants/entity.constant';
 export default router({
   list: publicProcedure.query(async () => {
     return await db.selectFrom('plant').selectAll('plant').select((eb) => [
-      // pets
       jsonArrayFrom(
-        eb.selectFrom('plant_tag')
-          .select(['plant_tag.name'])
-          .whereRef('plant_tag.plant_id', '=', 'plant.id')
-          .orderBy('plant_tag.name')
+        eb.selectFrom('image')
+          .selectAll()
+          .where('entity_id', '=', eb.ref('plant.id'))
+          .where('entity_type', '=', ENTITY_TYPE.PLANT)
+          .orderBy('id')
+      ).as('images'),
+      jsonArrayFrom(
+        eb.selectFrom('tag')
+          .selectAll()
+          .whereRef('tag.entity_id', '=', 'plant.id')
+          .where('tag.entity_type', '=', ENTITY_TYPE.PLANT)
+          .orderBy('tag.name')
       ).as('tags')]).execute();
   }),
   create: publicProcedure
@@ -22,23 +31,45 @@ export default router({
         description: options.input.description,
         watering_frequency: options.input.watering_frequency,
       }).returningAll().execute())[0];
-      if(options.input.tags.length) {
-        await db.insertInto('plant_tag').values(options.input.tags.map(tag => {
-          return {
-            plant_id: plant.id,
-            name: tag,
-          }
-        })).execute();
-        return {
-          ...plant,
-          tags: options.input.tags,
-        }
-      } else {
-        return {
-          ...plant,
-          tags: [],
-        }
+      return plant;
+
+    }),
+  get: publicProcedure
+    .input(z.string())
+    .query(async (opts) => {
+      const plant = await db
+        .selectFrom('plant')
+        .selectAll('plant')
+        .select((eb) => [
+          jsonArrayFrom(
+            eb.selectFrom('image')
+              .selectAll()
+              .where('entity_id', '=', eb.ref('plant.id'))
+              .where('entity_type', '=', ENTITY_TYPE.PLANT)
+              .orderBy('id')
+          ).as('images'),
+          jsonArrayFrom(
+            eb.selectFrom('tag')
+              .selectAll()
+              .where('entity_id', '=', eb.ref('plant.id'))
+              .where('entity_type', '=', ENTITY_TYPE.PLANT)
+              .orderBy('id')
+          ).as('tags'),
+        ])
+        .where('id', '=', opts.input)
+        .executeTakeFirst();
+
+      if (!plant) {
+        throw new Error('Plant not found');
       }
 
+      return plant;
+    }),
+
+  delete: publicProcedure
+    .input(z.string())
+    .mutation(async (opts) => {
+      await EntityService.hardDelete(ENTITY_TYPE.PLANT, opts.input);
+      return { success: true };
     }),
 });
