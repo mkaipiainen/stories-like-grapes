@@ -7,6 +7,8 @@ import { Provider } from 'react-redux';
 import { store } from '@store/store.ts';
 import { createTheme, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import superjson from 'superjson';
+
 const theme = createTheme({
   /** Put your mantine theme override here */
 });
@@ -27,6 +29,7 @@ export const Layout: FC<{ children: any }> = ({ children }) => {
           },
         }),
       ],
+      transformer: superjson,
     }),
   );
   return (
