@@ -29,6 +29,7 @@ import { trpc } from '@/util/trpc.ts';
 import { useDissolve } from '@/hooks/dissolve/use-dissolve.tsx';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
 type Inputs = {
   description: string;
 };
@@ -70,6 +71,7 @@ export function NewPlantFormStep3() {
     (state) => state.newPlantReducer.wateringFrequency,
   );
   const dissolve = useDissolve();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
   const [temporaryTags, setTemporaryTags] = useState<string[]>([]);
@@ -114,7 +116,7 @@ export function NewPlantFormStep3() {
             element: step3.current as HTMLElement,
             removeFromFlow: true,
           }).then(() => {
-            dispatch(setStep(1));
+            navigate('/plant-minder/list');
           });
         }, 1000);
       });

@@ -9,6 +9,10 @@ import {
 import { ComponentType, FC } from 'react';
 import { LoadingOverlay } from '@mantine/core';
 import { Layout } from '@/layout.tsx';
+import { PlantMinderListPage } from '@/pages/plant-minder/list/plant-minder.list.page.tsx';
+import { PlantMinderCreatePage } from '@/pages/plant-minder/create/plant-minder.create.page.tsx';
+import { PlantMinderRedirect } from '@/pages/plant-minder/plant-minder-redirect.tsx';
+import { PlantMinderDetailPage } from '@/pages/plant-minder/detail/plant-minder.create.page.tsx';
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -18,7 +22,7 @@ const AuthenticationGuard: FC<AuthenticationGuardProps> = ({
   component,
   ...props
 }) => {
-  const { isLoading, isAuthenticated } = useAuth0();
+  const { isLoading } = useAuth0();
   if (isLoading) {
     return (
       <LoadingOverlay
@@ -75,19 +79,29 @@ export const routes: RemixRouter = createBrowserRouter([
         </Layout>
       </Auth0ProviderWithNavigate>
     ),
-    errorElement: (
-      <h1
-        className={
-          'w-full h-full fixed top-0 left-0 flex justify-center items-center'
-        }
-      >
-        404 - Page not found
-      </h1>
-    ),
+    // ... existing code ...
     children: [
       {
         path: 'plant-minder',
         element: <AuthenticationGuard component={PlantMinderPage} />,
+        children: [
+          {
+            index: true,
+            element: <AuthenticationGuard component={PlantMinderRedirect} />,
+          },
+          {
+            path: 'new',
+            element: <PlantMinderCreatePage />,
+          },
+          {
+            path: 'list',
+            element: <PlantMinderListPage />,
+          },
+          {
+            path: 'detail/:id',
+            element: <PlantMinderDetailPage />,
+          },
+        ],
       },
     ],
   },
