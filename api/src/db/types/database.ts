@@ -1,6 +1,9 @@
-import { PlantTable, PlantTagTable } from './plant';
+import { PlantTable } from './plant';
+import { ImageTable } from './image';
+import { TagTable } from './tag';
 
 export type Database = {
   plant: PlantTable;
-  plant_tag: PlantTagTable;
+  image: ImageTable;
+  tag: TagTable;
 }

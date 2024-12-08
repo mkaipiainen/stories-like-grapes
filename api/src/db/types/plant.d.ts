@@ -1,7 +1,8 @@
 import { ColumnType, Generated, GeneratedAlways, Selectable } from 'kysely';
+import { Image } from './image';
 
 export type PlantTable = {
-  id: GeneratedAlways<number>;
+  id: GeneratedAlways<string>;
   name: string;
   watering_frequency: number | undefined;
   date_created: ColumnType<Date, never, never>;
@@ -10,16 +11,7 @@ export type PlantTable = {
   description: string | undefined;
 };
 
-export type PlantTagTable = {
-  id: Generated<number>;
-  plant_id: number;
-  name: string;
-  date_created: ColumnType<Date, never, never>;
-}
-
 export type Plant = Selectable<PlantTable> & {
-  tags: {
-    name: string;
-  }[];
+  tags: Tag[];
+  images: Image[];
 };
-export type PlantTag = Selectable<PlantTagTable>;
