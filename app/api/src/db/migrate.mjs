@@ -14,7 +14,15 @@ async function migrateToLatest() {
   console.log("Starting migrations...");
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
+  const migrationPath = path.join(__dirname, 'migrations');
 
+  console.log('Migration path:', migrationPath);
+  try {
+    const files = await fs.readdir(migrationPath);
+    console.log('Found migration files:', files);
+  } catch (err) {
+    console.error('Error reading migration directory:', err);
+  }
   const db = new Kysely({
     dialect: new PostgresDialect({
       pool: new pg.Pool({
@@ -29,10 +37,9 @@ async function migrateToLatest() {
       fs,
       path,
       // This needs to be an absolute path.
-      migrationFolder: path.join(__dirname, 'migrations'),
+      migrationFolder: migrationPath,
     }),
   })
-  console.log('Using migration folder:', path.join(__dirname, 'migrations'));
   const { error, results } = await migrator.migrateToLatest()
   console.log("Migration results:", results.length);
   results?.forEach((it) => {
