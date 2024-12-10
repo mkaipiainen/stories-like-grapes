@@ -9,7 +9,7 @@ RUN pnpm run build-frontend
 
 
 FROM caddy:2.8.1-alpine as runner
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY frontend/Caddyfile /etc/caddy/Caddyfile
 # Copy the built application to the web root
 COPY --from=builder /app/frontend/dist /srv
 
