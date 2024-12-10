@@ -42,7 +42,7 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
-          context: ./app/api
+          context: .
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
           file: ./app/api/Dockerfile
