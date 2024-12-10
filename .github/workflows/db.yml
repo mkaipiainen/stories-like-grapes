@@ -10,7 +10,7 @@ on:
       - main
     paths:
       - app/api/src/db/**
-      - app/api/Dockerfile.db-migrations
+      - app/Dockerfile.db-migrations
       - .github/workflows/db.yml
 
 jobs:
