@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - api/**
+      - app/api/**
       - .github/workflows/backend.yml
 
 jobs:
@@ -42,10 +42,10 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
-          context: ./api
+          context: ./app/api
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          file: ./api/Dockerfile
+          file: ./app/api/Dockerfile
           build-args: |
             AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
             AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |
