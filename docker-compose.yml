@@ -1,21 +1,18 @@
 services:
-  api:
-    image: ghcr.io/mkaipiainen/calendar-api:latest
-    networks:
-      - app-network
-  frontend:
-    image: ghcr.io/mkaipiainen/calendar-frontend:latest
-    networks:
-      - app-network
-  caddy:
-    image: ghcr.io/mkaipiainen/calendar-revproxy:latest
-    container_name: oad.caddy.dev
+  db:
+    image: postgres:17.1
+    container_name: postgres.dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+      POSTGRES_DB: storieslikegrapes
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "80:80"
-      - "443:443"
+      - "5433:5432"
     networks:
       - app-network
-
 
 networks:
   app-network:
+
+
