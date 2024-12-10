@@ -79,10 +79,10 @@ jobs:
       - name: Build and push migration image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./app
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-db-migrations:latest
-          file: ./app/Dockerfile.db-migrations
+          file: ./Dockerfile.db-migrations
 
       - name: Get and store Droplet IP
         run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
