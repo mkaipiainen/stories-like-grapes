@@ -68,7 +68,7 @@ jobs:
           docker rm -f slg-revproxy
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-revproxy:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-revproxy:latest
-          docker run --restart unless-stopped -d --name slg-revproxy -p 80:80 -p 443:443 --network app-default ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest 
+          docker run --restart unless-stopped -d --name slg-revproxy -p 80:80 -p 443:443 --network app-default ghcr.io/${{ github.repository_owner }}/slg-revproxy:latest 
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
