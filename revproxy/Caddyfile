@@ -9,8 +9,8 @@ storieslikegrapes.com {
         resolvers 1.1.1.1
     }
     handle_path /trpc* {
-        reverse_proxy http://calendar-api:80
+        reverse_proxy http://slg-api:80
     }
-    reverse_proxy http://calendar-frontend:80
+    reverse_proxy http://slg-frontend:80
 }
 

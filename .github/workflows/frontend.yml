@@ -44,7 +44,7 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
+          tags: ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
           file: ./frontend/Dockerfile
         env:
           VITE_AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
@@ -65,14 +65,14 @@ jobs:
           doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
           echo "${{ secrets.PERSONAL_ACCESS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
-          docker rm -f calendar-frontend
-          docker rmi ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest || true
-          docker pull ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
-          docker run --restart unless-stopped -d -p 8050:80 --name calendar-frontend --network app-default ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest 
+          docker rm -f slg-frontend
+          docker rmi ghcr.io/${{ github.repository_owner }}/slg-frontend:latest || true
+          docker pull ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
+          docker run --restart unless-stopped -d -p 8050:80 --name slg-frontend --network app-default ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest 
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          DOCKER_IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest
-          DOCKER_IMAGE_API: ghcr.io/${{ github.repository_owner }}/calendar-api:latest
-          DOCKER_IMAGE_REVPROXY: ghcr.io/${{ github.repository_owner }}/calendar-revproxy:latest
+          DOCKER_IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
+          DOCKER_IMAGE_API: ghcr.io/${{ github.repository_owner }}/slg-api:latest
+          DOCKER_IMAGE_REVPROXY: ghcr.io/${{ github.repository_owner }}/slg-revproxy:latest
         # Replace <droplet-name-or-ip>, <your-ssh-user>, and <commands> with your actual values
