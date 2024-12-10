@@ -13,7 +13,7 @@ on:
       - .github/workflows/backend.yml
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-backend:
     runs-on: ubuntu-latest
 
     environment:
@@ -45,7 +45,7 @@ jobs:
           context: ./app
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          file: ./app/api/Dockerfile
+          file: ./app/Dockerfile.api
           build-args: |
             AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
             AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |
