@@ -4,9 +4,9 @@ FROM node:22
 WORKDIR /app
 COPY package.json .
 COPY .npmrc .
-COPY src/db/migrate.mjs .
-COPY src/db/migrations ./migrations
-COPY src/db/seeds ./seeds
+COPY api/src/db/migrate.mjs .
+COPY api/src/db/migrations ./migrations
+COPY api/src/db/seeds ./seeds
 RUN npm install -g pnpm@latest
 RUN pnpm install
 CMD ["node", "migrate.mjs"]
