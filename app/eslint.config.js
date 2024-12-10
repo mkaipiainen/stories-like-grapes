@@ -33,7 +33,7 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'react-compiler/react-compiler': 'error',
+      'react-compiler/react-compiler': 'error'
     },
   },
   eslintConfigPrettier,
