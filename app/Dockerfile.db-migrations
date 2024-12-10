@@ -3,8 +3,6 @@ FROM node:22
 
 WORKDIR /app
 COPY . .
-COPY ./api/src/db/migrations ./api/src/db/migrations
-COPY ./api/src/db/seeds ./api/src/db/seeds
 RUN npm install -g pnpm@latest
 RUN pnpm install
 CMD ["node", "api/src/db/migrate.mjs"]

@@ -34,9 +34,6 @@ async function migrateToLatest() {
   const migrator = new Migrator({
     db,
     provider: new TSFileMigrationProvider({
-      fs,
-      path,
-      // This needs to be an absolute path.
       migrationFolder: migrationPath,
     }),
   })
