@@ -1,4 +1,4 @@
-FROM node:22.2.0 as builder
+FROM node:22.2.0 AS builder
 
 WORKDIR /app
 # Install pnpm globally
@@ -21,7 +21,7 @@ RUN pnpm install
 # Run the turbo build at the root, which will build all apps in parallel
 RUN pnpm run build
 
-FROM caddy:2.8.1-alpine as runner
+FROM caddy:2.8.1-alpine AS runner
 COPY /apps/frontend/Caddyfile /etc/caddy/Caddyfile
 # Copy the built application to the web root
 COPY --from=builder /apps/frontend/dist /srv

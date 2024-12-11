@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - apps/frontend/**
+      - Dockerfile.frontend
       - .github/workflows/frontend.yml
 
 jobs:
