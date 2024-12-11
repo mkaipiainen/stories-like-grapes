@@ -17,5 +17,5 @@ app.use(
     })
 );
 
-console.log("Listening for requests...");
+console.log(`Listening for requests on port ${isProduction ? 80 : 4201}`);
 app.listen(isProduction ? 80 : 4201);
