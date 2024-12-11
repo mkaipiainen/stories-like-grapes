@@ -1,8 +1,8 @@
-import { router, publicProcedure } from '../trpc';
+import { router, publicProcedure } from '../trpc.js';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { db } from '../db/db';
-import { ZodEntityType } from '../constants/entity.constant';
+import { db } from '../db/db.js';
+import { ZodEntityType } from '../constants/entity.constant.js';
 
 export const tagRouter = router({
   getById: publicProcedure

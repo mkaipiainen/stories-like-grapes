@@ -1,5 +1,5 @@
-import { EntityType } from '../constants/entity.constant';
-import { db } from '../db/db';
+import { EntityType } from '../constants/entity.constant.js';
+import { db } from '../db/db.js';
 
 export class EntityService {
   static async hardDelete(entityType: EntityType, entityId: string) {
