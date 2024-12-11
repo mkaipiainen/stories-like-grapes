@@ -38,7 +38,7 @@ async function migrateToLatest() {
     }),
   })
   const { error, results } = await migrator.migrateToLatest()
-  console.log("Migration results:", results.length);
+  console.log("Migration results:", results?.length);
   results?.forEach((it) => {
     if (it.status === 'Success') {
       console.log(`migration "${it.migrationName}" was executed successfully`)
