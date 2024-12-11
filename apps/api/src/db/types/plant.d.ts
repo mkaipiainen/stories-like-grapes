@@ -1,5 +1,6 @@
-import { ColumnType, Generated, GeneratedAlways, Selectable } from 'kysely';
+import { ColumnType, GeneratedAlways, Selectable } from 'kysely';
 import { Image } from './image';
+import {Tag} from "./tag";
 
 export type PlantTable = {
   id: GeneratedAlways<string>;
