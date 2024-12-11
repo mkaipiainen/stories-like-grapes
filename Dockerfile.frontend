@@ -5,7 +5,10 @@ WORKDIR /app
 RUN npm install -g pnpm@9.15.0
 
 # Copy only the lockfiles and package.json to install dependencies first
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY pnpm-lock.yaml .
+COPY pnpm-workspace.yaml .
+COPY package.json .
+COPY turbo.json .
 # If you have additional config files at root (like tsconfig.json), copy them as well
 COPY apps/*/package.json apps/*/
 
