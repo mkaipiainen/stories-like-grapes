@@ -7,11 +7,13 @@ import { NewPlantFormStepSwitcher } from '@/src/pages/plant-minder/components/ne
 import { Step } from '@/src/stores/slices/new-plant-slice.ts';
 import { useAppSelector } from '@/src/stores/store.ts';
 import { NewPlantFormStep3 } from '@/src/pages/plant-minder/components/new-plant-form-step3.tsx';
+import { NewPlantFormStep4 } from './new-plant-form-step4';
 
 export function NewPlantForm() {
   const step1 = useRef<HTMLDivElement | null>(null);
   const step2 = useRef<HTMLDivElement | null>(null);
   const step3 = useRef<HTMLDivElement | null>(null);
+  const step4 = useRef<HTMLDivElement | null>(null);
   const dissolve = useDissolve();
   const step = useAppSelector((state) => state.newPlantReducer.step);
   const [currentStep, setCurrentStep] = useState<Step>(1);
@@ -42,17 +44,29 @@ export function NewPlantForm() {
         );
       })
       .with(3, () => {
-        return (
-          <div className={'h-full w-full flex items-center justify-center'}>
-            <div className={'opacity-0 absolute z-0'} ref={step2}>
-              <NewPlantFormStep2 />
-            </div>
-            <div ref={step3} className={'z-10 step3'}>
-              <NewPlantFormStep3 />
-            </div>
-          </div>
-        );
-      })
+            return (
+                <div className={'h-full w-full flex items-center justify-center'}>
+                    <div className={'opacity-0 absolute z-0'} ref={step2}>
+                        <NewPlantFormStep2 />
+                    </div>
+                    <div ref={step3} className={'z-10 step3'}>
+                        <NewPlantFormStep3 />
+                    </div>
+                </div>
+            );
+        })
+        .with(4, () => {
+            return (
+                <div className={'h-full w-full flex items-center justify-center'}>
+                    <div className={'opacity-0 absolute z-0'} ref={step2}>
+                        <NewPlantFormStep3 />
+                    </div>
+                    <div ref={step4} className={'z-10 step3'}>
+                        <NewPlantFormStep4 />
+                    </div>
+                </div>
+            );
+        })
       .exhaustive();
   }, [step]);
 
@@ -64,11 +78,13 @@ export function NewPlantForm() {
       .with(1, () => step1)
       .with(2, () => step2)
       .with(3, () => step3)
+      .with(4, () => step4)
       .exhaustive();
     const sourceRef = match(currentStep)
       .with(1, () => step1)
       .with(2, () => step2)
       .with(3, () => step3)
+      .with(4, () => step4)
       .exhaustive();
     const DURATION = 1000;
 

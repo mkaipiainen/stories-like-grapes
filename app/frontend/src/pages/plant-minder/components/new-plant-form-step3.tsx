@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/src/stores/store.ts';
 import {
-  setDescription,
+  setDescription, setStep,
   setTags,
 } from '@/src/stores/slices/new-plant-slice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -24,10 +24,6 @@ import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
 import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { trpc } from '@/src/util/trpc.ts';
-import { useDissolve } from '@/src/hooks/dissolve/use-dissolve.tsx';
-import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
-import { notifications } from '@mantine/notifications';
-import { useNavigate } from 'react-router-dom';
 type Inputs = {
   description: string;
 };
@@ -60,16 +56,7 @@ export function NewPlantFormStep3() {
   const mutation = trpc.plant.create.useMutation();
   const { quill, quillRef } = useQuill();
   const tags = useAppSelector((state) => state.newPlantReducer.tags);
-  const name = useAppSelector((state) => state.newPlantReducer.name);
-  const description = useAppSelector(
-    (state) => state.newPlantReducer.description,
-  );
   const step3 = useRef<HTMLFormElement | null>(null);
-  const wateringFrequency = useAppSelector(
-    (state) => state.newPlantReducer.wateringFrequency,
-  );
-  const dissolve = useDissolve();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
   const [temporaryTags, setTemporaryTags] = useState<string[]>([]);
@@ -87,37 +74,7 @@ export function NewPlantFormStep3() {
   }, [quill]);
 
   function onSubmit() {
-    mutation
-      .mutateAsync({
-        name,
-        description,
-        watering_frequency:
-          typeof wateringFrequency === 'string'
-            ? parseInt(wateringFrequency)
-            : wateringFrequency,
-        tags,
-      })
-      .then(() => {
-        notifications.show({
-          title: 'Success!',
-          message: 'Added a new plant!',
-          color: 'green',
-          position: 'top-center',
-          icon: (
-            <FontAwesomeIcon color={'white'} icon={faCheck}></FontAwesomeIcon>
-          ),
-          autoClose: 2000,
-        });
-        setTimeout(() => {
-          dissolve({
-            duration: 500,
-            element: step3.current as HTMLElement,
-            removeFromFlow: true,
-          }).then(() => {
-            navigate('/plant-minder/list');
-          });
-        }, 1000);
-      });
+    dispatch(setStep(4));
   }
 
   function acceptTags(selectedTags: string[]) {

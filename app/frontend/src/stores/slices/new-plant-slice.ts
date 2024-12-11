@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export const STEPS: Step[] = [1, 2, 3];
-export type Step = 1 | 2 | 3;
+export const STEPS: Step[] = [1, 2, 3, 4];
+export type Step = 1 | 2 | 3 | 4;
 
 export type NewPlantSliceState = {
   name: string;

@@ -16,7 +16,7 @@ type Inputs = {
   description: string;
 };
 
-export function NewPlantFormStep3() {
+export function NewPlantFormStep4() {
   const step4 = useRef<HTMLFormElement | null>(null);
   const dissolve = useDissolve();
   const navigate = useNavigate();
