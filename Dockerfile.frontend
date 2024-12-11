@@ -13,7 +13,6 @@ COPY turbo.json .
 COPY apps/*/package.json apps/*/
 
 # Install dependencies without the full source code to leverage caching
-RUN pnpm fetch --prod
 RUN pnpm install
 
 # Now copy the remaining source code
