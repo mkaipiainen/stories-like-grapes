@@ -1,6 +1,5 @@
 {
   "files": [
-    "./frontend/tailwind.config.js",
     "./eslint.config.js"
   ],
   "include": ["api/src/**/*", "frontend/src/**/*"],

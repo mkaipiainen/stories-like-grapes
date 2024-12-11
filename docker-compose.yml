@@ -1,12 +1,14 @@
 services:
   db:
     image: postgres:17.1
-    container_name: postgres.dev
+    container_name: slg.dev.db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD:
       POSTGRES_DB: storieslikegrapes
       POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     networks:

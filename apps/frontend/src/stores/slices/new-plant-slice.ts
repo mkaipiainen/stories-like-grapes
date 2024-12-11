@@ -9,6 +9,7 @@ export type NewPlantSliceState = {
   tags: string[];
   description: string;
   wateringFrequency: number | string;
+  images?: File[];
 };
 
 const initialState = {
@@ -17,6 +18,7 @@ const initialState = {
   tags: [],
   description: '',
   wateringFrequency: 0,
+  images: []
 } satisfies NewPlantSliceState as NewPlantSliceState;
 
 export const NewPlantSlice = createSlice({
@@ -38,6 +40,9 @@ export const NewPlantSlice = createSlice({
     setWateringFrequency: (state, action: PayloadAction<number | string>) => {
       state.wateringFrequency = action.payload;
     },
+    setImages: (state, action: PayloadAction<File[]>) => {
+      state.images = action.payload;
+    }
   },
 });
 

@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - app/api/**
+      - apps/api/**
       - .github/workflows/backend.yml
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
           context: ./app
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          file: ./app/Dockerfile.api
+          file: ./apps/Dockerfile.api
           build-args: |
             AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
             AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |

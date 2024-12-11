@@ -10,7 +10,7 @@ docker compose up -d
 
 # Start the API and frontend in parallel
 echo "Starting API and frontend..."
-(cd app && pnpm dev)
+(pnpm dev)
 
 # Wait for all background processes
 wait

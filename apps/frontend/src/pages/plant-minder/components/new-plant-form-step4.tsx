@@ -6,12 +6,15 @@ import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
   Button,
   Group,
+  Text
 } from '@mantine/core';
 import { useDissolve } from '@/src/hooks/dissolve/use-dissolve.tsx';
 import { useNavigate } from 'react-router-dom';
 import {trpc} from "@/src/util/trpc.ts";
 import {notifications} from "@mantine/notifications";
 import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
+import {Dropzone, IMAGE_MIME_TYPE} from "@mantine/dropzone";
+import {faCamera, faCancel} from "@fortawesome/free-solid-svg-icons";
 type Inputs = {
   description: string;
 };
@@ -67,6 +70,33 @@ export function NewPlantFormStep4() {
       className={'flex flex-col items-start'}
       ref={step4}
     >
+      <Dropzone
+          onDrop={(files) => console.log('accepted files', files)}
+          onReject={(files) => console.log('rejected files', files)}
+          maxSize={5 * 1024 ** 2}
+          accept={IMAGE_MIME_TYPE}
+      >
+        <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
+          <Dropzone.Accept>
+            <FontAwesomeIcon size={'xl'} icon={faCheck}></FontAwesomeIcon>
+          </Dropzone.Accept>
+          <Dropzone.Reject>
+            <FontAwesomeIcon size={'xl'} icon={faCancel}></FontAwesomeIcon>
+          </Dropzone.Reject>
+          <Dropzone.Idle>
+            <FontAwesomeIcon size={'xl'} icon={faCamera}></FontAwesomeIcon>
+          </Dropzone.Idle>
+
+          <div>
+            <Text size="xl" inline>
+              Drag images here or click to select files
+            </Text>
+            <Text size="sm" c="dimmed" inline mt={7}>
+              Attach as many files as you like, each file should not exceed 5mb
+            </Text>
+          </div>
+        </Group>
+      </Dropzone>
       <Button
         type={'submit'}
         className={

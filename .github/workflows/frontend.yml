@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - app/frontend/**
+      - apps/frontend/**
       - .github/workflows/frontend.yml
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
           context: ./app
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
-          file: ./app/Dockerfile.frontend
+          file: ./apps/Dockerfile.frontend
         env:
           VITE_AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
 
