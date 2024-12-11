@@ -5,6 +5,8 @@
   "scripts": {
     "migrate": "node ./apps/api/src/db/migrate.mjs",
     "build": "turbo build",
+    "build-frontend": "turbo build --filter=frontend",
+    "build-api": "turbo build --filter=api",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""

@@ -14,15 +14,15 @@ COPY apps/*/package.json apps/*/
 
 # Install dependencies without the full source code to leverage caching
 RUN pnpm fetch --prod
+RUN pnpm install
 
 # Now copy the remaining source code
 COPY . .
 
 # Install all dependencies fully now (including dev)
-RUN pnpm install
 
 # Run the turbo build at the root, which will build all apps in parallel
-RUN pnpm run build --filter=frontend
+RUN pnpm run build-frontend
 
 FROM caddy:2.8.1-alpine AS runner
 COPY --from=builder /app/apps/frontend/Caddyfile /etc/caddy/Caddyfile
