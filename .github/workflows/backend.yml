@@ -72,7 +72,7 @@ jobs:
           docker rm -f slg-api
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-api:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          docker run -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public --restart unless-stopped -p 8051:80 -d --name slg-api --network app-default ghcr.io/${{ github.repository_owner }}/calendar-api:latest 
+          docker run -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public --restart unless-stopped -p 8051:80 -d --name slg-api --network app-default ghcr.io/${{ github.repository_owner }}/slg-api:latest 
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

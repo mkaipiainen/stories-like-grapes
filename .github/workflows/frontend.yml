@@ -68,7 +68,7 @@ jobs:
           docker rm -f slg-frontend
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-frontend:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
-          docker run --restart unless-stopped -d -p 8050:80 --name slg-frontend --network app-default ghcr.io/${{ github.repository_owner }}/calendar-frontend:latest 
+          docker run --restart unless-stopped -d -p 8050:80 --name slg-frontend --network app-default ghcr.io/${{ github.repository_owner }}/slg-frontend:latest 
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
