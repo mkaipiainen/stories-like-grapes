@@ -45,7 +45,7 @@ jobs:
           context: ./apps
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          file: ./apps/Dockerfile.api
+          file: ./Dockerfile.api
           build-args: |
             AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
             AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |
