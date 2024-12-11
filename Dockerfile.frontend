@@ -22,7 +22,7 @@ COPY . .
 RUN pnpm install
 
 # Run the turbo build at the root, which will build all apps in parallel
-RUN pnpm run build
+RUN pnpm run build --filter=frontend
 
 FROM caddy:2.8.1-alpine AS runner
 COPY --from=builder /app/apps/frontend/Caddyfile /etc/caddy/Caddyfile
