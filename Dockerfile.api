@@ -10,7 +10,7 @@ ENV AUTH0_ISSUER=${AUTH0_ISSUER}
 
 WORKDIR /app
 COPY . .
-RUN npm install -g pnpm@9.7.0
+RUN npm install -g pnpm@9.15.0
 RUN pnpm install
 RUN pnpm build-api
 CMD ["node", "api/src/index.js"]
