@@ -13,4 +13,4 @@ COPY . .
 RUN npm install -g pnpm@9.15.0
 RUN pnpm install
 RUN pnpm build-api
-CMD ["node", "api/src/index.js"]
+CMD ["node", "apps/api/dist/index.js"]
