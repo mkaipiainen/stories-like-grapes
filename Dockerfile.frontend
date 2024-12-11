@@ -1,17 +1,30 @@
 FROM node:22.2.0 as builder
 
 WORKDIR /app
+# Install pnpm globally
 RUN npm install -g pnpm@9.15.0
 
+# Copy only the lockfiles and package.json to install dependencies first
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+# If you have additional config files at root (like tsconfig.json), copy them as well
+COPY apps/*/package.json apps/*/
+
+# Install dependencies without the full source code to leverage caching
+RUN pnpm fetch --prod
+
+# Now copy the remaining source code
 COPY . .
+
+# Install all dependencies fully now (including dev)
 RUN pnpm install
-WORKDIR /app/apps/frontend
+
+# Run the turbo build at the root, which will build all apps in parallel
 RUN pnpm run build
 
 FROM caddy:2.8.1-alpine as runner
 COPY /apps/frontend/Caddyfile /etc/caddy/Caddyfile
 # Copy the built application to the web root
-COPY --from=builder dist /srv
+COPY --from=builder /apps/frontend/dist /srv
 
 # Run Caddy
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
