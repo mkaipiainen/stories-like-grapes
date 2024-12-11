@@ -17,4 +17,5 @@ app.use(
     })
 );
 
+console.log("Listening for requests...");
 app.listen(isProduction ? 80 : 4201);
