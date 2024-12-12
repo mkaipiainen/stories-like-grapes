@@ -2,15 +2,35 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter } from './router.js';
 import express from 'express';
 import cors from 'cors';
+import { expressjwt, GetVerificationKey } from 'express-jwt';
+import { expressJwtSecret } from 'jwks-rsa';
+
 const app = express();
 const isProduction = process.env.ENVIRONMENT === 'production';
 if(!isProduction) {
     app.use(cors());
 }
+
+
+
+export const secured = (req: any, res: any, next: any) => expressjwt({
+  secret: expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 1,
+    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+  }) as unknown as GetVerificationKey,
+  getToken: (req: any) => {
+    return req?.headers?.authorization?.replace('Bearer ', '') ?? '';
+  },
+  audience: process.env.AUTH0_AUDIENCE,
+  algorithms: ['RS256'],
+})(req, res, next) as Promise<void>
 // created for each request
 const createContext = () => ({}) // no context
 app.use(
     '/trpc',
+    secured,
     trpcExpress.createExpressMiddleware({
       router: appRouter,
       createContext,

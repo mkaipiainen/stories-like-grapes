@@ -8,6 +8,8 @@
     "build-frontend": "turbo build --filter=frontend",
     "build-api": "turbo build --filter=api",
     "dev": "turbo dev",
+    "dev-frontend": "turbo dev --filter=frontend",
+    "dev-api": "turbo dev --filter=api",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
