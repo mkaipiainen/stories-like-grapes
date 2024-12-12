@@ -3,8 +3,15 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { db } from '../db/db.js';
 import { ZodEntityType } from '../constants/entity.constant.js';
+import {awsService} from "../services/aws.service.js";
+import {GUID} from "../util/guid.js";
 
 export const imageRouter = router({
+  getS3Url: publicProcedure.input(z.string()).query(async ({input: id}) => {
+    const s3ObjectUrl = `https://stories-like-grapes.s3.eu-north-1.amazonaws.com/${id}`;
+    const presignedUrl = await awsService.generateS3Url(s3ObjectUrl, 'GET');
+    return presignedUrl
+  }),
   getById: publicProcedure
     .input(z.string())
     .query(async ({ input: id }) => {
@@ -40,7 +47,7 @@ export const imageRouter = router({
       return images;
     }),
 
-  upload: publicProcedure
+  create: publicProcedure
     .input(z.object({
       entityType: z.optional(ZodEntityType),
       entityId: z.optional(z.string()),
@@ -50,16 +57,34 @@ export const imageRouter = router({
     }))
     .mutation(async ({ input }) => {
       // Convert base64 to Buffer
-      const buffer = Buffer.from(input.imageData.split(',')[1], 'base64');
-
+      const base64Data = input.imageData.split(',')[1];
+      if (!base64Data) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid base64 image data',
+        });
+      }
+      const buffer = Buffer.from(base64Data, 'base64');
+      const id = GUID();
+      const s3ObjectUrl = `https://stories-like-grapes.s3.eu-north-1.amazonaws.com/${id}`;
+      const presignedPutUrl = await awsService.generateS3Url(s3ObjectUrl, 'PUT');
+      await fetch(presignedPutUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': input.mimeType,
+        },
+        body: buffer
+      });
+      // Insert the new image record into the database
       const newImage = await db
         .insertInto('image')
         .values({
           entity_type: input.entityType,
           entity_id: input.entityId,
-          image_data: buffer,
+          id: id,
           filename: input.filename,
           mime_type: input.mimeType,
+          url: s3ObjectUrl, // Store the S3 URL in the database
         })
         .returningAll()
         .executeTakeFirst();

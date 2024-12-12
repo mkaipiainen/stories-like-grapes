@@ -167,8 +167,14 @@ button:focus-visible {
         @apply mr-0
       }
     }
+  }
 
+  .horizontal-divider {
+    @apply w-full h-0.5 my-4;
+  }
 
+  .vertical-divider {
+    @apply h-full w-0.5 mx-4;
   }
 }
 

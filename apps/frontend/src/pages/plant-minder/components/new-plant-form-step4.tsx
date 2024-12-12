@@ -1,6 +1,5 @@
-import { useForm } from 'react-hook-form';
-import { useRef } from 'react';
-import { useAppSelector} from '@/src/stores/store.ts';
+import {useForm, UseFormReturn} from 'react-hook-form';
+import {Dispatch, SetStateAction, useRef} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
@@ -15,35 +14,36 @@ import {notifications} from "@mantine/notifications";
 import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
 import {Dropzone, IMAGE_MIME_TYPE} from "@mantine/dropzone";
 import {faCamera, faCancel} from "@fortawesome/free-solid-svg-icons";
-type Inputs = {
-  description: string;
-};
+import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
+import {Step} from "@/src/stores/slices/new-plant-slice.ts";
+import {ENTITY_TYPE} from "@api/src/constants/entity.constant.ts";
+import {UseFileUpload} from "@/src/hooks/use-file-upload.tsx";
 
-export function NewPlantFormStep4() {
+export function NewPlantFormStep4(props: {
+  form: UseFormReturn<NewPlantFormInputs>,
+  setTransitionTarget: Dispatch<SetStateAction<Step>>;
+}) {
   const step4 = useRef<HTMLFormElement | null>(null);
   const dissolve = useDissolve();
   const navigate = useNavigate();
-  const { handleSubmit } = useForm<Inputs>();
-  const {mutateAsync, isLoading} = trpc.plant.create.useMutation();
-  const tags = useAppSelector((state) => state.newPlantReducer.tags);
-  const name = useAppSelector((state) => state.newPlantReducer.name);
-  const description = useAppSelector(
-      (state) => state.newPlantReducer.description,
-  );
-  const wateringFrequency = useAppSelector(
-      (state) => state.newPlantReducer.wateringFrequency,
-  );
+  const { handleSubmit } = useForm();
+  const plantMutation = trpc.plant.create.useMutation();
+  const uploadFile = UseFileUpload();
+  async function onSubmit() {
+    try {
+      const data = props.form.getValues();
+      const plant = await plantMutation.mutateAsync({
+        description: data.description,
+        name: data.name,
+        tags: data.tags,
+        watering_frequency: parseInt(data.wateringFrequency)
+      })
+      const image = props.form.getValues('image');
+      await uploadFile(image, {
+        id: plant.id,
+        type: ENTITY_TYPE.PLANT,
+      });
 
-  function onSubmit() {
-    mutateAsync({
-      name,
-      description,
-      watering_frequency:
-          typeof wateringFrequency === 'string'
-              ? parseInt(wateringFrequency)
-              : wateringFrequency,
-      tags,
-    }).then(() => {
       notifications.show({
         title: 'Success!',
         message: 'Added a new plant!',
@@ -61,7 +61,17 @@ export function NewPlantFormStep4() {
           navigate('/plant-minder/list');
         });
       }, 1000);
-    });
+    } catch(e) {
+      console.log("Error:", e);
+      notifications.show({
+        title: 'Error!',
+        message: 'There was an error adding the new plant.',
+        color: 'red',
+        position: 'top-center',
+        icon: <FontAwesomeIcon color={'white'} icon={faCancel}></FontAwesomeIcon>,
+        autoClose: 2000,
+      });
+    }
   }
 
   return (
@@ -71,7 +81,9 @@ export function NewPlantFormStep4() {
       ref={step4}
     >
       <Dropzone
-          onDrop={(files) => console.log('accepted files', files)}
+          onDrop={(files) => {
+            props.form.setValue('image', files[0]);
+          }}
           onReject={(files) => console.log('rejected files', files)}
           maxSize={5 * 1024 ** 2}
           accept={IMAGE_MIME_TYPE}
@@ -102,7 +114,7 @@ export function NewPlantFormStep4() {
         className={
           'hover:bg-primary-800 transition-colors cursor-pointer w-full mt-4'
         }
-        disabled={isLoading}
+        disabled={plantMutation.isLoading}
         variant="outline"
         size="icon"
       >

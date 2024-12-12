@@ -1,31 +1,27 @@
-import { ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useAppDispatch, useAppSelector } from '@/src/stores/store.ts';
-import { setName, setStep } from '@/src/stores/slices/new-plant-slice';
+import {useForm, UseFormReturn} from 'react-hook-form';
 import { Button, TextInput } from '@mantine/core';
+import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
+import {Dispatch, SetStateAction, useCallback} from "react";
+import {Step} from "@/src/stores/slices/new-plant-slice.ts";
 
-type Inputs = {
-  name: string;
-};
-export function NewPlantFormStep1() {
-  const name = useAppSelector((state) => state.newPlantReducer.name);
-  const dispatch = useAppDispatch();
-  const { register, handleSubmit } = useForm<Inputs>();
-  function onNameChange(event: ChangeEvent<HTMLInputElement>) {
-    dispatch(setName(event.target.value));
-  }
-
-  const onSubmit: SubmitHandler<Inputs> = () => {
-    dispatch(setStep(2));
+export function NewPlantFormStep1(props: {
+  form: UseFormReturn<NewPlantFormInputs>,
+  setTransitionTarget: Dispatch<SetStateAction<Step>>;
+}) {
+  const { handleSubmit } = useForm();
+  const onSubmit = () => {
+    props.setTransitionTarget(2);
   };
+  const nameWatcher = props.form.watch('name');
 
-  function getContinueButtonClass() {
+  const getContinueButtonClass = useCallback(() => {
     const defaultClasses =
       'hover:bg-primary-800 transition-colors cursor-pointer';
-    return !name.length ? defaultClasses + ' disable' : defaultClasses;
-  }
+    return !nameWatcher.length ? defaultClasses + ' disable' : defaultClasses;
+  }, [nameWatcher])
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -36,12 +32,11 @@ export function NewPlantFormStep1() {
       </span>
       <TextInput
         autoComplete="off"
-        {...register('name')}
+        {...props.form.register('name')}
         className={'mb-4'}
-        value={name}
+        value={nameWatcher}
         label={'Name'}
         required={true}
-        onChange={onNameChange}
       ></TextInput>
       <Button
         type={'submit'}

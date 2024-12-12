@@ -1,11 +1,6 @@
 import { useQuill } from 'react-quilljs';
-import { useForm } from 'react-hook-form';
-import { useEffect, useRef, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/src/stores/store.ts';
-import {
-  setDescription, setStep,
-  setTags,
-} from '@/src/stores/slices/new-plant-slice.ts';
+import {useForm, UseFormReturn} from 'react-hook-form';
+import {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
@@ -23,7 +18,8 @@ import { faCloud } from '@fortawesome/free-solid-svg-icons';
 import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
 import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { trpc } from '@/src/util/trpc.ts';
+import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
+import {Step} from "@/src/stores/slices/new-plant-slice.ts";
 type Inputs = {
   description: string;
 };
@@ -51,19 +47,20 @@ const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
   TAGS,
 ) as unknown as (keyof typeof TAGS)[];
 
-export function NewPlantFormStep3() {
+export function NewPlantFormStep3(props: {
+  form: UseFormReturn<NewPlantFormInputs>,
+  setTransitionTarget: Dispatch<SetStateAction<Step>>;
+}) {
   const [opened, { open, close }] = useDisclosure(false);
-  const mutation = trpc.plant.create.useMutation();
   const { quill, quillRef } = useQuill();
-  const tags = useAppSelector((state) => state.newPlantReducer.tags);
   const step3 = useRef<HTMLFormElement | null>(null);
-  const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<Inputs>();
   const [temporaryTags, setTemporaryTags] = useState<string[]>([]);
+  const tagWatcher = props.form.watch('tags');
   useEffect(() => {
     if (quill) {
       quill.on('text-change', () => {
-        dispatch(setDescription(quill.root.innerHTML));
+        props.form.setValue('description', quill.root.innerHTML);
       });
     }
     return () => {
@@ -74,11 +71,11 @@ export function NewPlantFormStep3() {
   }, [quill]);
 
   function onSubmit() {
-    dispatch(setStep(4));
+    props.setTransitionTarget(4);
   }
 
   function acceptTags(selectedTags: string[]) {
-    dispatch(setTags([...selectedTags]));
+    props.form.setValue('tags', [...selectedTags])
     setTemporaryTags([]);
     close();
   }
@@ -116,7 +113,7 @@ export function NewPlantFormStep3() {
           <Button onClick={() => acceptTags(temporaryTags)}>Accept</Button>
         </Modal>
         <div className={'flex flex-wrap'}>
-          {tags.map((tag) => (
+          {tagWatcher.map((tag) => (
             <Chip defaultChecked size="xs" className={'m-1'}>
               {tag}
             </Chip>
@@ -151,13 +148,12 @@ export function NewPlantFormStep3() {
         className={
           'hover:bg-primary-800 transition-colors cursor-pointer w-full mt-4'
         }
-        disabled={mutation.isLoading}
         variant="outline"
         size="icon"
       >
         <Group>
           <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
-          Submit plant
+          Next step
         </Group>
       </Button>
     </form>

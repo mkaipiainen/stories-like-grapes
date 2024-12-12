@@ -1,39 +1,34 @@
-import { useForm } from 'react-hook-form';
-import { useAppDispatch, useAppSelector } from '@/src/stores/store.ts';
-import {
-  setStep,
-  setWateringFrequency,
-} from '@/src/stores/slices/new-plant-slice.ts';
+import {useForm, UseFormReturn} from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import { isNil } from 'rambda';
 import { Button, NumberInput } from '@mantine/core';
+import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
+import {Dispatch, SetStateAction, useCallback} from "react";
+import {Step} from "@/src/stores/slices/new-plant-slice.ts";
 
-type Inputs = {
-  wateringFrequency: string;
-};
 
-export function NewPlantFormStep2() {
-  const dispatch = useAppDispatch();
-  const wateringFrequency = useAppSelector(
-    (state) => state.newPlantReducer.wateringFrequency,
-  );
-  const { register, handleSubmit } = useForm<Inputs>();
+export function NewPlantFormStep2(props: {
+  form: UseFormReturn<NewPlantFormInputs>,
+  setTransitionTarget: Dispatch<SetStateAction<Step>>;
+}) {
+  const { handleSubmit } = useForm();
+  const wateringFrequencyWatcher = props.form.watch('wateringFrequency');
 
   function onSubmit() {
-    dispatch(setStep(3));
-  }
-  function getContinueButtonClass() {
-    const defaultClasses =
-      'hover:bg-primary-800 transition-colors cursor-pointer w-full';
-    return isNil(wateringFrequency)
-      ? defaultClasses + ' disable'
-      : defaultClasses;
+    props.setTransitionTarget(3);
   }
 
-  function onWateringFrequencyChange(event: number | string) {
-    dispatch(setWateringFrequency(event));
+  const getContinueButtonClass = useCallback(() => {
+    const defaultClasses =
+      'hover:bg-primary-800 transition-colors cursor-pointer';
+    return isNil(wateringFrequencyWatcher) ? defaultClasses + ' disable' : defaultClasses;
+  }, [wateringFrequencyWatcher])
+
+  function onWateringFrequencyChange(value: string | number) {
+    props.form.setValue('wateringFrequency', value.toString());
   }
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -46,12 +41,12 @@ export function NewPlantFormStep2() {
         <span className="text-nowrap mr-4 flex items-center">Water every </span>
         <NumberInput
           className={'mr-4 flex items-center'}
-          value={wateringFrequency}
-          {...register('wateringFrequency')}
+          value={wateringFrequencyWatcher}
+          {...props.form.register('wateringFrequency')}
           min={0}
           max={undefined}
-          required={true}
           onChange={onWateringFrequencyChange}
+          required={true}
         ></NumberInput>
         <span className={'flex items-center'}>days</span>
       </div>

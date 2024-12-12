@@ -5,7 +5,7 @@ export type ImageTable = {
   id: Generated<string>;
   entity_type: EntityType | null;
   entity_id: string | null;
-  image_data: Buffer;
+  url: string;
   filename: string | undefined;
   mime_type: string | undefined;
   date_created: ColumnType<Date, never, never>;

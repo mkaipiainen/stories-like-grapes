@@ -3,7 +3,7 @@ import { sql, type Kysely } from 'kysely';
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('image')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
+    .addColumn('id', 'uuid', (col) => col.primaryKey())
     .addColumn('entity_type', 'varchar')
     .addColumn('entity_id', 'uuid')
     .addColumn('data', 'bytea', (col) => col.notNull())
