@@ -47,14 +47,6 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-api:latest
           file: ./Dockerfile.api
-          build-args: |
-            AUTH0_DOMAIN=${{ secrets.CLOUDFLARE_API_KEY }} |
-            AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} |
-            AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} |
-            AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
-            S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}
-            S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}
-            ENVIRONMENT=production
 
       - name: Get and store Droplet IP
         run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
@@ -75,7 +67,21 @@ jobs:
           docker rm -f slg-api
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-api:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-api:latest
-          docker run -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public --restart unless-stopped -p 8051:80 -d --name slg-api --network app-default ghcr.io/${{ github.repository_owner }}/slg-api:latest 
+          docker run \
+          -e CONNECTION_STRING=postgresql://postgres:${{ secrets.DB_PASSWORD }}@slg-db:5432/storieslikegrapes?schema=public \
+          -e AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+          -e AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+          -e AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} \
+          -e AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
+          -e S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }} \
+          -e S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }} \
+          -e ENVIRONMENT=production \
+          --restart unless-stopped \
+          -p 8051:80 \
+          -d \
+          --name slg-api \
+          --network app-default \
+          ghcr.io/${{ github.repository_owner }}/slg-api:latest
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
