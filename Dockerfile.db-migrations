@@ -5,4 +5,4 @@ WORKDIR /app
 COPY . .
 RUN npm install -g pnpm@latest
 RUN pnpm install
-CMD ["node", "api/src/db/migrate.mjs"]
+CMD ["node", "apps/api/src/db/migrate.mjs"]
