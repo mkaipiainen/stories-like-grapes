@@ -1,7 +1,7 @@
-import { router } from './trpc.js';
-import plantRouter from './routers/plant.router.js';
-import {imageRouter} from "./routers/image.router.js";
-import {tagRouter} from "./routers/tag.router.js";
+import { router } from './trpc';
+import plantRouter from './routers/plant.router';
+import {imageRouter} from "./routers/image.router";
+import {tagRouter} from "./routers/tag.router";
 export const appRouter = router({
   plant: plantRouter,
   image: imageRouter,

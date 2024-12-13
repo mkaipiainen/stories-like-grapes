@@ -1,6 +1,6 @@
 import pg from 'pg';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Database } from './types/database.js';
+import { type Database } from './types/database';
 const dialect = new PostgresDialect({
   pool: new pg.Pool({
     connectionString: process.env.CONNECTION_STRING,

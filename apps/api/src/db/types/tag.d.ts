@@ -1,5 +1,5 @@
 import { ColumnType, Generated, Selectable } from 'kysely';
-import { EntityType } from '../../constants/entity.constant.js';
+import { EntityType } from '../../constants/entity.constant';
 
 export type TagTable = {
   id: Generated<string>;

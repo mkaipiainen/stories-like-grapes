@@ -1,11 +1,12 @@
-import { publicProcedure, router } from '../trpc.js';
+import { publicProcedure, router } from '../trpc';
 import { z } from 'zod';
-import { db } from '../db/db.js';
+import { db } from '../db/db';
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
-import { EntityService } from '../services/delete.service.js';
-import { ENTITY_TYPE } from '../constants/entity.constant.js';
+import { EntityService } from '../services/delete.service';
+import { ENTITY_TYPE } from '../constants/entity.constant';
 export default router({
   list: publicProcedure.query(async () => {
+    console.log("Hello as well")
     return await db.selectFrom('plant').selectAll('plant').select((eb) => [
       jsonArrayFrom(
         eb.selectFrom('image')

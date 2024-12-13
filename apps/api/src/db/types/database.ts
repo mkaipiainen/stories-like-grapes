@@ -1,6 +1,6 @@
-import type { PlantTable } from './plant.js';
-import type { ImageTable } from './image.js';
-import type { TagTable } from './tag.js';
+import type { PlantTable } from './plant';
+import type { ImageTable } from './image';
+import type { TagTable } from './tag';
 
 export type Database = {
   plant: PlantTable;

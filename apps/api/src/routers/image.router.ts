@@ -1,15 +1,14 @@
-import { router, publicProcedure } from '../trpc.js';
+import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { db } from '../db/db.js';
-import { ZodEntityType } from '../constants/entity.constant.js';
-import {awsService} from "../services/aws.service.js";
-import {GUID} from "../util/guid.js";
+import { db } from '../db/db';
+import { ZodEntityType } from '../constants/entity.constant';
+import {awsService} from "../services/aws.service";
+import {GUID} from "../util/guid";
 
 export const imageRouter = router({
   getS3Url: publicProcedure.input(z.string()).query(async ({input: id}) => {
-    const s3ObjectUrl = `https://stories-like-grapes.s3.eu-north-1.amazonaws.com/${id}`;
-    const presignedUrl = await awsService.generateS3Url(s3ObjectUrl, 'GET');
+    const presignedUrl = await awsService.generateS3Url(id, 'GET');
     return presignedUrl
   }),
   getById: publicProcedure
@@ -66,9 +65,8 @@ export const imageRouter = router({
       }
       const buffer = Buffer.from(base64Data, 'base64');
       const id = GUID();
-      const s3ObjectUrl = `https://stories-like-grapes.s3.eu-north-1.amazonaws.com/${id}`;
-      const presignedPutUrl = await awsService.generateS3Url(s3ObjectUrl, 'PUT');
-      await fetch(presignedPutUrl, {
+      const url = await awsService.generateS3Url(id, 'PUT');
+      await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': input.mimeType,
@@ -84,7 +82,7 @@ export const imageRouter = router({
           id: id,
           filename: input.filename,
           mime_type: input.mimeType,
-          url: s3ObjectUrl, // Store the S3 URL in the database
+          url: url, // Store the S3 URL in the database
         })
         .returningAll()
         .executeTakeFirst();
