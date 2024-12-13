@@ -1,8 +1,8 @@
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { appRouter } from './router.js';
+import { appRouter } from './router';
 import express from 'express';
 import cors from 'cors';
-import { expressjwt, GetVerificationKey } from 'express-jwt';
+import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import { expressJwtSecret } from 'jwks-rsa';
 
 const app = express();
@@ -11,7 +11,7 @@ if(!isProduction) {
     app.use(cors());
 }
 
-
+console.log("Hello?");
 
 export const secured = (req: any, res: any, next: any) => expressjwt({
   secret: expressJwtSecret({
