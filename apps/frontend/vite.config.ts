@@ -10,7 +10,6 @@ export default defineConfig({
       typescript: true,
     }),
   ],
-  publicDir: './src/public',
   server: {
     host: '0.0.0.0',
     port: 4200,
