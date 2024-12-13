@@ -6,7 +6,7 @@ import {useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {trpc} from "@/src/util/trpc.ts";
-
+import plantPlaceholder from '@/src/assets/plant-placeholder.webp';
 export function PlantCard(props: {
 	plant: Plant
 }) {
@@ -67,7 +67,7 @@ export function PlantCard(props: {
 
 				<Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2'}>
 					{props.plant.images.length ? <S3Image id={props.plant.images[0]?.id}></S3Image> : <Image
-						src="/plant-placeholder.webp"
+						src={plantPlaceholder}
 						height={160}
 						alt="Plant image placeholder"
 						className={'h-full object-contain'}
