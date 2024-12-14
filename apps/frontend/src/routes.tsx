@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, useNavigate } from 'react-router-dom';
+import {createBrowserRouter, Navigate, Outlet, useNavigate} from 'react-router-dom';
 import { PlantMinderPage } from './pages/plant-minder/plant-minder.page';
 import type { Router as RemixRouter } from '@remix-run/router/dist/router';
 import {
@@ -81,6 +81,10 @@ export const routes: RemixRouter = createBrowserRouter([
     ),
     // ... existing code ...
     children: [
+      {
+        index: true, // Matches the base path
+        element: <Navigate to="/plant-minder" replace />,
+      },
       {
         path: 'plant-minder',
         element: <AuthenticationGuard component={PlantMinderPage} />,
