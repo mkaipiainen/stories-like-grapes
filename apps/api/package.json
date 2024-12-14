@@ -8,7 +8,7 @@
   "scripts": {
     "migrate": "node ./src/db/migrate.mjs",
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
-    "dev": "nodemon --env-file ./.env --exec tsx src/index.ts -L"
+    "dev": "nodemon --env-file ./.env --watch src --ext ts --exec tsx src/index.ts -L"
   },
   "exports": {
     "./router": "./src/router.ts"
@@ -27,6 +27,7 @@
     "@types/express": "^5.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "express-jwt": "^8.4.1",

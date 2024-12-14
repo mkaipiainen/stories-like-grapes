@@ -2,9 +2,9 @@ import {ActionIcon, Badge, Card, Group, Image, LoadingOverlay, Text} from "@mant
 import {S3Image} from "@/src/components/s3-image.tsx";
 import {Link} from "react-router-dom";
 import {Plant} from "@api/src/db/types/plant";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faDroplet, faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {trpc} from "@/src/util/trpc.ts";
 import plantPlaceholder from '@/src/assets/plant-placeholder.webp';
 import worriedPlantPlaceholder from '@/src/assets/plant-placeholder-worried.webp';
@@ -12,9 +12,12 @@ import angryPlantPlaceholder from '@/src/assets/plant-placeholder-angry.webp';
 import {TAGS} from "@/src/constants/tags.ts";
 import dayjs from "dayjs";
 import {match} from "ts-pattern";
+import {useDissolve} from "@/src/hooks/dissolve/use-dissolve.tsx";
 export function PlantCard(props: {
 	plant: Plant
 }) {
+	const card = useRef<HTMLDivElement>(null);
+	const dissolve = useDissolve();
 	const [seed] = useState(Math.ceil(Math.random() * 1000))
 	const filterId = `filter-${props.plant.id}`;
 	const trpcContext = trpc.useUtils();
@@ -43,8 +46,18 @@ export function PlantCard(props: {
 		setDaysSinceWatering(dayDifference > 0 ? 0 : Math.abs(dayDifference));
 	}, [props.plant.next_watering_date]);
 
+	const doWaterMutation = trpc.plant.water.useMutation({
+		onSettled: () => {
+			trpcContext.plant.list.invalidate();
+		}
+	});
 	const deleteMutation = trpc.plant.delete.useMutation({
 		onMutate: async (id: string) => {
+			if(card.current) {
+				await dissolve({
+					element: card.current
+				})
+			}
 			await trpcContext.plant.list.cancel(); // Cancel any ongoing fetch for `list`
 			const previousData = trpcContext.plant.list.getData();
 
@@ -60,13 +73,24 @@ export function PlantCard(props: {
 				trpcContext.plant.list.setData(undefined, context.previousData);
 			}
 		},
-		onSettled: () => {
-			trpcContext.plant.list.invalidate();
+		onSettled: async () => {
+			if(card.current) {
+				await dissolve({
+					element: card.current
+				})
+				await trpcContext.plant.list.invalidate();
+			} else {
+				await trpcContext.plant.list.invalidate();
+			}
 		}
 	});
 
 	function onDelete() {
 		deleteMutation.mutate(props.plant.id)
+	}
+
+	function onDoWater() {
+		doWaterMutation.mutate(props.plant.id);
 	}
 
 	function getCardClass() {
@@ -77,12 +101,15 @@ export function PlantCard(props: {
 
 
 	return (
-		<div className={getCardClass()}>
+		<div className={getCardClass()} ref={card}>
 			{deleteMutation.isLoading ? <LoadingOverlay
 				visible={true}
 				zIndex={1000}
 				overlayProps={{ radius: 'lg', blur: 2 }}
 				pos={'absolute'}></LoadingOverlay> : <></>}
+			<ActionIcon color={'green'} onClick={() => onDoWater()} className={'shadow-action shadow-primary-foreground absolute top-0 -left-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Delete">
+				<FontAwesomeIcon size={'lg'} color={'white'} icon={faDroplet}></FontAwesomeIcon>
+			</ActionIcon>
 			<ActionIcon className={'shadow-action shadow-primary-foreground absolute top-0 -right-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Edit">
 				<Link
 					to={{
@@ -142,7 +169,7 @@ export function PlantCard(props: {
 					{daysUntilWatering > 0 ?
 						<Text size={'xs'}>Water in {daysUntilWatering} days</Text>
 						:
-						<Text size={'xs'}>Water today! {daysSinceWatering > 0 ? `(${daysSinceWatering} days overdue)` : ''}</Text>
+						<Text size={'xs'}><span className={'text-danger font-bold'}>Water today! {daysSinceWatering > 0 ? `(${daysSinceWatering} days overdue)` : ''}</span></Text>
 					}
 				</Card.Section>
 

@@ -4,6 +4,8 @@ import { db } from '../db/db';
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
 import { EntityService } from '../services/delete.service';
 import { ENTITY_TYPE } from '../constants/entity.constant';
+import {sql} from "kysely";
+import dayjs from "dayjs";
 export default router({
   list: publicProcedure.query(async () => {
     return await db.selectFrom('plant').selectAll('plant').select((eb) => [
@@ -20,7 +22,7 @@ export default router({
           .whereRef('tag.entity_id', '=', 'plant.id')
           .where('tag.entity_type', '=', ENTITY_TYPE.PLANT)
           .orderBy('tag.name')
-      ).as('tags')]).execute();
+      ).as('tags')]).orderBy('plant.next_watering_date', 'asc').execute();
   }),
   create: publicProcedure
     .input(z.object({ name: z.string(), description: z.string(), watering_frequency: z.number() }))
@@ -64,7 +66,12 @@ export default router({
 
       return plant;
     }),
-
+  water: publicProcedure.input(z.string()).mutation(async (opts) => {
+    const plant = await db.selectFrom('plant').select('watering_frequency').where('id', '=', opts.input).executeTakeFirstOrThrow();
+    const nextWateringDate = dayjs(new Date()).add(plant.watering_frequency ?? 0, 'day');
+    const updatedPlant = await db.updateTable('plant').where('id', '=', opts.input).set('last_watered', sql`now()`).set('next_watering_date', nextWateringDate.toDate()).returningAll().execute();
+    return updatedPlant;
+  }),
   delete: publicProcedure
     .input(z.string())
     .mutation(async (opts) => {

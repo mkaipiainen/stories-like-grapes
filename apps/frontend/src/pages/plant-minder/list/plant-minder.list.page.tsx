@@ -5,15 +5,45 @@ import {
 } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import {PlantCard} from "@/src/pages/plant-minder/list/components/plant-card.tsx";
+import {UseHasRoles} from "@/src/hooks/use-has-roles.ts";
+import {GUID} from "@/src/util/guid.ts";
+import {ENTITY_TYPE} from "@api/src/constants/entity.constant.ts";
 
 export function PlantMinderListPage() {
+  const trpcContext = trpc.useUtils();
+  const isAdmin = UseHasRoles(['Admin'])
   const { isLoading, data } = trpc.plant.list.useQuery();
+  const createPlantMutation = trpc.plant.create.useMutation({
+    onSettled: async () => {
+      await trpcContext.plant.list.invalidate();
+    }
+  });
+  const createTagsMutation = trpc.tag.create.useMutation({
+    onSettled: async () => {
+      await trpcContext.plant.list.invalidate();
+    }
+  });
 
+  async function quickAddTestPlant() {
+    const testPlant = await createPlantMutation.mutateAsync({
+      name: GUID(),
+      description: 'This is a description',
+      watering_frequency: 5,
+    })
+    for (const tag of ['spray-water', 'half-shade']) {
+      createTagsMutation.mutate({
+        name: tag,
+        entityId: testPlant.id,
+        entityType: ENTITY_TYPE.PLANT
+      })
+    }
+
+  }
     return (
-        <>
-            {isLoading ? (
-                <LoadingOverlay
-                    visible={true}
+    <>
+      {isLoading ? (
+        <LoadingOverlay
+          visible={true}
           zIndex={1000}
           overlayProps={{ radius: 'lg', blur: 2 }}
           pos={'absolute'}
@@ -23,19 +53,25 @@ export function PlantMinderListPage() {
       )}
       <div className={'flex flex-col h-full w-full items-center'}>
           <div className={'flex items-center flex-wrap flex-grow'}>
-            {data?.map((datum) => <PlantCard key={datum.id} plant={datum}></PlantCard>)}
+            {data?.map((plant) => <PlantCard key={plant.id} plant={plant}></PlantCard>)}
           </div>
           <div className={'horizontal-divider'}>
           </div>
+        <div className={'flex items-center justify-center'}>
           <div className={'flex justify-center items-center'}>
-              <Link                to={{
-                  pathname: `/plant-minder/new`,
-              }}>
-                  <Button>Add a plant</Button>
-              </Link>
-
+            <Link                to={{
+              pathname: `/plant-minder/new`,
+            }}>
+              <Button>Add a plant</Button>
+            </Link>
           </div>
+          {isAdmin ? (
+            <div className={'ml-4 flex justify-center items-center'}>
+              <Button onClick={() => quickAddTestPlant()}>Quick-add a test-plant</Button>
+            </div>
+          ) : <></>}
+        </div>
       </div>
     </>
-  );
+    );
 }
