@@ -27,7 +27,7 @@ const manifest: Partial<VitePWAOptions> = {
   devOptions: { enabled: true }, // Enables SW during development for testing.
   injectRegister: 'auto',
   workbox: {
-    globPatterns: [],
+    globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
     cleanupOutdatedCaches: true,
   }
 }
