@@ -3,20 +3,6 @@ import react from '@vitejs/plugin-react-swc';
 import { fileURLToPath, URL } from 'node:url';
 import checker from 'vite-plugin-checker';
 import {VitePWA, VitePWAOptions} from "vite-plugin-pwa";
-import {createHash} from "node:crypto";
-function getHash(text: string) {
-  return createHash('sha256').update(text).digest('hex').substring(0, 8);
-}
-
-const htmlHashPlugin = {
-  name: 'html-hash',
-  enforce: 'post',
-  generateBundle(_options: any, bundle: any) {
-    const indexHtml = bundle['index.html'];
-    indexHtml.fileName = `index.${getHash(indexHtml.source)}.html`;
-  },
-} as const;
-
 const manifest: Partial<VitePWAOptions> = {
   includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
   manifest: {
@@ -41,7 +27,7 @@ const manifest: Partial<VitePWAOptions> = {
   devOptions: { enabled: true }, // Enables SW during development for testing.
   injectRegister: 'auto',
   workbox: {
-    globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+    globPatterns: [],
     cleanupOutdatedCaches: true,
   }
 }
@@ -52,7 +38,6 @@ export default defineConfig({
     checker({
       typescript: true,
     }),
-    htmlHashPlugin,
     VitePWA(manifest)
   ],
   server: {
