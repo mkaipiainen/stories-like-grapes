@@ -26,7 +26,6 @@ export function PlantCard(props: {
 	const [plantPlaceholderImage, setPlantPlaceholderImage] = useState(plantPlaceholder);
 	const [mood, setMood] = useState<'normal'  | 'worried' | 'angry'>(daysSinceWatering <= 0 ? 'normal' : (daysSinceWatering > 0 && daysSinceWatering < 3 ? 'worried' : 'angry'));
 	useEffect(() => {
-		console.log(daysSinceWatering);
 		setMood(daysSinceWatering === 0 ? 'normal' : (daysSinceWatering > 0 && daysSinceWatering < 3 ? 'worried' : 'angry'));
 	}, [daysSinceWatering]);
 
