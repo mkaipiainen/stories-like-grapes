@@ -11,8 +11,6 @@ if(!isProduction) {
     app.use(cors());
 }
 
-console.log("Hello?");
-
 export const secured = (req: any, res: any, next: any) => expressjwt({
   secret: expressJwtSecret({
     cache: true,

@@ -13,35 +13,12 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { faSun } from '@fortawesome/free-solid-svg-icons/faSun';
-import { faCloud } from '@fortawesome/free-solid-svg-icons';
-import { faCloudSun } from '@fortawesome/free-solid-svg-icons/faCloudSun';
-import { faSprayCanSparkles } from '@fortawesome/free-solid-svg-icons/faSprayCanSparkles';
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
 import {Step} from "@/src/stores/slices/new-plant-slice.ts";
+import {TAGS} from "@/src/constants/tags.ts";
 type Inputs = {
   description: string;
 };
-
-const TAGS: Record<string, { label: string; icon: IconDefinition }> = {
-  light: {
-    label: 'Lots of light',
-    icon: faSun,
-  },
-  'half-shade': {
-    label: 'Half shade',
-    icon: faCloudSun,
-  },
-  'full-shade': {
-    label: 'Full shade',
-    icon: faCloud,
-  },
-  'spray-water': {
-    label: 'Spray water',
-    icon: faSprayCanSparkles,
-  },
-} as const;
 
 const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
   TAGS,

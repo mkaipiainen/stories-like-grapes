@@ -15,7 +15,7 @@ export type NewPlantFormInputs = {
   description: string;
   wateringFrequency: string;
   tags: string[];
-  image: FileWithPath;
+  image: FileWithPath | undefined;
 };
 
 export function NewPlantForm() {

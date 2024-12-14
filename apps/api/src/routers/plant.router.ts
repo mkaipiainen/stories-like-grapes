@@ -6,7 +6,6 @@ import { EntityService } from '../services/delete.service';
 import { ENTITY_TYPE } from '../constants/entity.constant';
 export default router({
   list: publicProcedure.query(async () => {
-    console.log("Hello as well")
     return await db.selectFrom('plant').selectAll('plant').select((eb) => [
       jsonArrayFrom(
         eb.selectFrom('image')
@@ -24,7 +23,7 @@ export default router({
       ).as('tags')]).execute();
   }),
   create: publicProcedure
-    .input(z.object({ name: z.string(), description: z.string(), watering_frequency: z.number(), tags: z.array(z.string()) }))
+    .input(z.object({ name: z.string(), description: z.string(), watering_frequency: z.number() }))
     .mutation(async (options) => {
       // Create a user in the database
       const plant = (await db.insertInto('plant').values({
@@ -33,7 +32,6 @@ export default router({
         watering_frequency: options.input.watering_frequency,
       }).returningAll().execute())[0];
       return plant;
-
     }),
   get: publicProcedure
     .input(z.string())

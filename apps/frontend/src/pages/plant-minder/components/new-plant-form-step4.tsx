@@ -28,6 +28,7 @@ export function NewPlantFormStep4(props: {
   const navigate = useNavigate();
   const { handleSubmit } = useForm();
   const plantMutation = trpc.plant.create.useMutation();
+  const tagMutation = trpc.tag.create.useMutation();
   const uploadFile = UseFileUpload();
   async function onSubmit() {
     try {
@@ -35,14 +36,25 @@ export function NewPlantFormStep4(props: {
       const plant = await plantMutation.mutateAsync({
         description: data.description,
         name: data.name,
-        tags: data.tags,
         watering_frequency: parseInt(data.wateringFrequency)
       })
       const image = props.form.getValues('image');
-      await uploadFile(image, {
-        id: plant.id,
-        type: ENTITY_TYPE.PLANT,
-      });
+      const tags = props.form.getValues('tags');
+      if(image) {
+        await uploadFile(image, {
+          id: plant.id,
+          type: ENTITY_TYPE.PLANT,
+        });
+      }
+      if(tags) {
+        await Promise.all(tags.map(tag => {
+          return tagMutation.mutateAsync({
+            name: tag,
+            entityId: plant.id,
+            entityType: ENTITY_TYPE.PLANT,
+          })
+        }))
+      }
 
       notifications.show({
         title: 'Success!',

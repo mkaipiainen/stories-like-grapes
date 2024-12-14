@@ -2,17 +2,46 @@ import {ActionIcon, Badge, Card, Group, Image, LoadingOverlay, Text} from "@mant
 import {S3Image} from "@/src/components/s3-image.tsx";
 import {Link} from "react-router-dom";
 import {Plant} from "@api/src/db/types/plant";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {trpc} from "@/src/util/trpc.ts";
 import plantPlaceholder from '@/src/assets/plant-placeholder.webp';
+import worriedPlantPlaceholder from '@/src/assets/plant-placeholder-worried.webp';
+import angryPlantPlaceholder from '@/src/assets/plant-placeholder-angry.webp';
+import {TAGS} from "@/src/constants/tags.ts";
+import dayjs from "dayjs";
+import {match} from "ts-pattern";
 export function PlantCard(props: {
 	plant: Plant
 }) {
 	const [seed] = useState(Math.ceil(Math.random() * 1000))
 	const filterId = `filter-${props.plant.id}`;
 	const trpcContext = trpc.useUtils();
+	const [daysUntilWatering, setDaysUntilWatering] = useState<number>(0);
+	const [daysSinceWatering, setDaysSinceWatering] = useState<number>(0);
+	const [plantPlaceholderImage, setPlantPlaceholderImage] = useState(plantPlaceholder);
+	const [mood, setMood] = useState<'normal'  | 'worried' | 'angry'>(daysSinceWatering <= 0 ? 'normal' : (daysSinceWatering > 0 && daysSinceWatering < 3 ? 'worried' : 'angry'));
+	useEffect(() => {
+		console.log(daysSinceWatering);
+		setMood(daysSinceWatering === 0 ? 'normal' : (daysSinceWatering > 0 && daysSinceWatering < 3 ? 'worried' : 'angry'));
+	}, [daysSinceWatering]);
+
+	useEffect(() => {
+		setPlantPlaceholderImage(match(mood).with('normal', () => {
+			return plantPlaceholder
+		}).with('worried', () => {
+			return worriedPlantPlaceholder
+		}).with('angry', () => {
+			return angryPlantPlaceholder
+		}).exhaustive())
+	}, [mood]);
+	useEffect(() => {
+		const dayDifference = dayjs(props.plant.next_watering_date).diff(dayjs(new Date()), 'day');
+		console.log(dayDifference);
+		setDaysUntilWatering(dayDifference);
+		setDaysSinceWatering(dayDifference > 0 ? 0 : Math.abs(dayDifference));
+	}, [props.plant.next_watering_date]);
 
 	const deleteMutation = trpc.plant.delete.useMutation({
 		onMutate: async (id: string) => {
@@ -36,15 +65,25 @@ export function PlantCard(props: {
 		}
 	});
 
+	function onDelete() {
+		deleteMutation.mutate(props.plant.id)
+	}
+
+	function getCardClass() {
+		const mood = daysSinceWatering === 0 ? 'normal' : (daysSinceWatering > 0 && daysSinceWatering < 3 ? 'worried' : 'angry');
+
+		return `flex items-center justify-center relative w-80 h-80 m-4 ${mood}`;
+	}
+
 
 	return (
-		<div className={'flex items-center justify-center relative w-80 h-80 m-4'}>
+		<div className={getCardClass()}>
 			{deleteMutation.isLoading ? <LoadingOverlay
 				visible={true}
 				zIndex={1000}
 				overlayProps={{ radius: 'lg', blur: 2 }}
 				pos={'absolute'}></LoadingOverlay> : <></>}
-			<ActionIcon className={'absolute -top-4 -right-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Edit">
+			<ActionIcon className={'shadow-action shadow-primary-foreground absolute top-0 -right-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Edit">
 				<Link
 					to={{
 						pathname: `/plant-minder/detail/${props.plant.id}`,
@@ -53,11 +92,11 @@ export function PlantCard(props: {
 					<FontAwesomeIcon color={'white'} icon={faEdit}></FontAwesomeIcon>
 				</Link>
 			</ActionIcon>
-			<ActionIcon onClick={() => deleteMutation.mutate(props.plant.id)} className={'absolute -top-4 -left-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Delete">
+			<ActionIcon color={'red'} onClick={() => onDelete()} className={'shadow-action shadow-primary-foreground absolute top-12 -right-0.5 z-10'} variant="filled" size="lg" radius="xl" aria-label="Delete">
 					<FontAwesomeIcon color={'white'} icon={faTrash}></FontAwesomeIcon>
 			</ActionIcon>
 			<Card
-				className={'w-80 h-80 m-4 border-none box-border'}
+				className={'w-80 h-80 m-4 border-none box-border items-center'}
 				shadow="sm"
 				padding="lg"
 				radius="md"
@@ -65,30 +104,51 @@ export function PlantCard(props: {
 				style={{filter: `url(#${filterId}) drop-shadow(2px 5px 1px rgba(0, 0, 0, 0.2))`}}
 			>
 
-				<Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2'}>
+				<Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2 w-full'}>
 					{props.plant.images.length ? <S3Image id={props.plant.images[0]?.id}></S3Image> : <Image
-						src={plantPlaceholder}
+						src={plantPlaceholderImage}
 						height={160}
 						alt="Plant image placeholder"
 						className={'h-full object-contain'}
 					/>}
 				</Card.Section>
-				<Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2'}>
+				<Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2 w-full'}>
 
 					<Group justify="space-between" mt="md" mb="xs">
 						<Text fw={500}>{props.plant.name}</Text>
 					</Group>
+					{props.plant.tags.length ?(
+							<>
+								<div className={'horizontal-divider bg-primary-800'}></div>
 
-					<Group justify="space-between" mt="md" mb="xs">
-						{props.plant.tags.map((tag) => (
-							<Badge color="pink">{tag.name}</Badge>
-						))}
-					</Group>
+								<Group justify="space-between" mt="md" mb="xs">
+									{props.plant.tags.map((tag) => (
+										<Badge key={tag.name} color="pink">
+											<Group className={'flex justify-between flex-nowrap'}>
+												<FontAwesomeIcon icon={TAGS[tag.name].icon}></FontAwesomeIcon>
+												<Text size={'xs'}>{tag.name}</Text>
+											</Group>
+
+										</Badge>
+									))}
+								</Group>
+							</>
+
+						)
+						: <></>}
+
+					<div className={'horizontal-divider bg-primary-800'}></div>
+
+					{daysUntilWatering > 0 ?
+						<Text size={'xs'}>Water in {daysUntilWatering} days</Text>
+						:
+						<Text size={'xs'}>Water today! {daysSinceWatering > 0 ? `(${daysSinceWatering} days overdue)` : ''}</Text>
+					}
 				</Card.Section>
 
 			</Card>
 			<svg className={'w-0 h-0 fixed'} width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-				<defs>
+			<defs>
 					<filter id={filterId} x="0" y="0" width="200%" height="200%">
 						<feTurbulence seed={seed} type="fractalNoise" baseFrequency="0.05" numOctaves="3" result="turbulence"/>
 

@@ -10,6 +10,7 @@ export type PlantTable = {
   date_updated: ColumnType<Date, never, never>;
   last_watered: ColumnType<Date | undefined, string | undefined, string | undefined>;
   description: string | undefined;
+  next_watering_date: Date | undefined;
 };
 
 export type Plant = Selectable<PlantTable> & {

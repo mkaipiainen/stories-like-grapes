@@ -23,7 +23,7 @@ export function PlantMinderListPage() {
       )}
       <div className={'flex flex-col h-full w-full items-center'}>
           <div className={'flex items-center flex-wrap flex-grow'}>
-            {data?.map((datum) => <PlantCard plant={datum}></PlantCard>)}
+            {data?.map((datum) => <PlantCard key={datum.id} plant={datum}></PlantCard>)}
           </div>
           <div className={'horizontal-divider'}>
           </div>
