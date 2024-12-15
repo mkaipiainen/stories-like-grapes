@@ -1,4 +1,4 @@
-import {createBrowserRouter, Navigate, Outlet, useNavigate} from 'react-router-dom';
+import {createBrowserRouter, Outlet, useNavigate} from 'react-router-dom';
 import { PlantMinderPage } from './pages/plant-minder/plant-minder.page';
 import type { Router as RemixRouter } from '@remix-run/router/dist/router';
 import {
@@ -13,6 +13,7 @@ import { PlantMinderListPage } from '@/src/pages/plant-minder/list/plant-minder.
 import { PlantMinderCreatePage } from '@/src/pages/plant-minder/create/plant-minder.create.page.tsx';
 import { PlantMinderRedirect } from '@/src/pages/plant-minder/plant-minder-redirect.tsx';
 import { PlantMinderDetailPage } from '@/src/pages/plant-minder/detail/plant-minder.create.page.tsx';
+import {LandingPage} from "@/src/pages/landing/landing.page.tsx";
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -79,11 +80,10 @@ export const routes: RemixRouter = createBrowserRouter([
         </Layout>
       </Auth0ProviderWithNavigate>
     ),
-    // ... existing code ...
     children: [
       {
         path: '',
-        element: <Navigate to="/plant-minder" replace />,
+        element: <AuthenticationGuard component={LandingPage}/>
       },
       {
         path: 'plant-minder',

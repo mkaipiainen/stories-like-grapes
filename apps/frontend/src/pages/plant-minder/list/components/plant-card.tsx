@@ -40,7 +40,6 @@ export function PlantCard(props: {
 	}, [mood]);
 	useEffect(() => {
 		const dayDifference = dayjs(props.plant.next_watering_date).diff(dayjs(new Date()), 'day');
-		console.log(dayDifference);
 		setDaysUntilWatering(dayDifference);
 		setDaysSinceWatering(dayDifference > 0 ? 0 : Math.abs(dayDifference));
 	}, [props.plant.next_watering_date]);
