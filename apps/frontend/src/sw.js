@@ -1,3 +1,8 @@
+import { precacheAndRoute } from 'workbox-precaching';
+
+// Injected by Workbox during build
+precacheAndRoute(self.__WB_MANIFEST);
+
 self.addEventListener('push', (event) => {
 	if (event.data) {
 		const data = event.data.json();

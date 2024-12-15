@@ -42,8 +42,12 @@ export default defineConfig({
     VitePWA({
       ...manifest,
       srcDir: 'src',
-      filename: 'sw.js', // ensure this matches your file name
-      strategies: 'injectManifest', // needed to use custom SW
+      filename: 'sw.js', // Ensure this matches the filename in src
+      strategies: 'injectManifest',
+      injectManifest: {
+        swSrc: 'src/sw.js', // The path to your custom SW file
+        swDest: 'dist/sw.js', // Output path for the built SW
+      },
     })
   ],
   server: {
