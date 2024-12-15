@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import { fileURLToPath, URL } from 'node:url';
 import checker from 'vite-plugin-checker';
 import {VitePWA, VitePWAOptions} from "vite-plugin-pwa";
+
 const manifest: Partial<VitePWAOptions> = {
   includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
   manifest: {

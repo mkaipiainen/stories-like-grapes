@@ -82,7 +82,7 @@ export const routes: RemixRouter = createBrowserRouter([
     // ... existing code ...
     children: [
       {
-        index: true, // Matches the base path
+        path: '',
         element: <Navigate to="/plant-minder" replace />,
       },
       {
