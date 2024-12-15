@@ -3,9 +3,9 @@ import { sql, type Kysely } from 'kysely';
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('image')
-    .addColumn('id', 'uuid', (col) => col.primaryKey())
+    .addColumn('id', 'varchar', (col) => col.primaryKey())
     .addColumn('entity_type', 'varchar')
-    .addColumn('entity_id', 'uuid')
+    .addColumn('entity_id', 'varchar')
     .addColumn('data', 'bytea', (col) => col.notNull())
     .addColumn('filename', 'varchar')
     .addColumn('mime_type', 'varchar')

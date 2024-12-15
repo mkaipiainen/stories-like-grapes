@@ -14,6 +14,7 @@ import { PlantMinderCreatePage } from '@/src/pages/plant-minder/create/plant-min
 import { PlantMinderRedirect } from '@/src/pages/plant-minder/plant-minder-redirect.tsx';
 import { PlantMinderDetailPage } from '@/src/pages/plant-minder/detail/plant-minder.create.page.tsx';
 import {LandingPage} from "@/src/pages/landing/landing.page.tsx";
+import {AppWrapper} from "@/src/app-wrapper.tsx";
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -76,7 +77,9 @@ export const routes: RemixRouter = createBrowserRouter([
     element: (
       <Auth0ProviderWithNavigate>
         <Layout>
-          <Outlet />
+          <AppWrapper>
+            <Outlet />
+          </AppWrapper>
         </Layout>
       </Auth0ProviderWithNavigate>
     ),

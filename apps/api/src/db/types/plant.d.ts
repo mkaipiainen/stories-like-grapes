@@ -11,9 +11,12 @@ export type PlantTable = {
   last_watered: ColumnType<Date | undefined, string | undefined, string | undefined>;
   description: string | undefined;
   next_watering_date: Date | undefined;
+  user_id: string;
 };
 
-export type Plant = Selectable<PlantTable> & {
+export type Plant = Selectable<PlantTable>;
+
+export type PlantWithTagsAndImages = Selectable<PlantTable> & {
   tags: Tag[];
   images: Image[];
 };

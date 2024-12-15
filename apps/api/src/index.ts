@@ -4,6 +4,8 @@ import express from 'express';
 import cors from 'cors';
 import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import { expressJwtSecret } from 'jwks-rsa';
+import {createContext} from "./trpc";
+import {SchedulerService} from "./services/scheduler.service";
 
 const app = express();
 const isProduction = process.env.ENVIRONMENT === 'production';
@@ -25,7 +27,7 @@ export const secured = (req: any, res: any, next: any) => expressjwt({
   algorithms: ['RS256'],
 })(req, res, next) as Promise<void>
 // created for each request
-const createContext = () => ({}) // no context
+
 app.use(
     '/trpc',
     secured,
@@ -34,6 +36,6 @@ app.use(
       createContext,
     })
 );
-
+SchedulerService();
 console.log(`Listening for requests on port ${isProduction ? 80 : 4201}`);
 app.listen(isProduction ? 80 : 4201);

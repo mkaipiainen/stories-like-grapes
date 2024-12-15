@@ -39,7 +39,12 @@ export default defineConfig({
     checker({
       typescript: true,
     }),
-    VitePWA(manifest)
+    VitePWA({
+      ...manifest,
+      srcDir: 'src',
+      filename: 'sw.js', // ensure this matches your file name
+      strategies: 'injectManifest', // needed to use custom SW
+    })
   ],
   server: {
     host: '0.0.0.0',

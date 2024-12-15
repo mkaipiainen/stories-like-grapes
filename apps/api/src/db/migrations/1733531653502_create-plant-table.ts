@@ -2,7 +2,7 @@ import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
 	await db.schema.createTable('plant')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
+    .addColumn('id', 'varchar', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn('name', 'varchar', (col) => col.notNull())
     .addColumn('description', 'text')
     .addColumn('watering_frequency', 'integer')

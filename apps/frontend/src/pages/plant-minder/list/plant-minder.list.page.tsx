@@ -13,6 +13,7 @@ export function PlantMinderListPage() {
   const trpcContext = trpc.useUtils();
   const isAdmin = UseHasRoles(['Admin'])
   const { isLoading, data } = trpc.plant.list.useQuery();
+  const testPushMutation = trpc.subscription.test.useMutation();
   const createPlantMutation = trpc.plant.create.useMutation({
     onSettled: async () => {
       await trpcContext.plant.list.invalidate();
@@ -70,6 +71,7 @@ export function PlantMinderListPage() {
               <Button onClick={() => quickAddTestPlant()}>Quick-add a test-plant</Button>
             </div>
           ) : <></>}
+          <Button onClick={() => testPushMutation.mutate()}>Mutate</Button>
         </div>
       </div>
     </>

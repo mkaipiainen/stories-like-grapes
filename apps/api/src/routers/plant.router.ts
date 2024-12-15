@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '../trpc';
+import { router } from '../trpc';
 import { z } from 'zod';
 import { db } from '../db/db';
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
@@ -6,8 +6,9 @@ import { EntityService } from '../services/delete.service';
 import { ENTITY_TYPE } from '../constants/entity.constant';
 import {sql} from "kysely";
 import dayjs from "dayjs";
+import {protectedProcedure} from "../procedures/protected.procedure";
 export default router({
-  list: publicProcedure.query(async () => {
+  list: protectedProcedure.query(async () => {
     return await db.selectFrom('plant').selectAll('plant').select((eb) => [
       jsonArrayFrom(
         eb.selectFrom('image')
@@ -24,7 +25,7 @@ export default router({
           .orderBy('tag.name')
       ).as('tags')]).orderBy('plant.next_watering_date', 'asc').execute();
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string(), description: z.string(), watering_frequency: z.number() }))
     .mutation(async (options) => {
       // Create a user in the database
@@ -32,10 +33,11 @@ export default router({
         name: options.input.name,
         description: options.input.description,
         watering_frequency: options.input.watering_frequency,
+        user_id: options.ctx.userId
       }).returningAll().execute())[0];
       return plant;
     }),
-  get: publicProcedure
+  get: protectedProcedure
     .input(z.string())
     .query(async (opts) => {
       const plant = await db
@@ -66,13 +68,13 @@ export default router({
 
       return plant;
     }),
-  water: publicProcedure.input(z.string()).mutation(async (opts) => {
+  water: protectedProcedure.input(z.string()).mutation(async (opts) => {
     const plant = await db.selectFrom('plant').select('watering_frequency').where('id', '=', opts.input).executeTakeFirstOrThrow();
     const nextWateringDate = dayjs(new Date()).add(plant.watering_frequency ?? 0, 'day');
     const updatedPlant = await db.updateTable('plant').where('id', '=', opts.input).set('last_watered', sql`now()`).set('next_watering_date', nextWateringDate.toDate()).returningAll().execute();
     return updatedPlant;
   }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.string())
     .mutation(async (opts) => {
       await EntityService.hardDelete(ENTITY_TYPE.PLANT, opts.input);

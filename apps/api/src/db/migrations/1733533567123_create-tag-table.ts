@@ -2,9 +2,9 @@ import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema.createTable('tag')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
+    .addColumn('id', 'varchar', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn('entity_type', 'varchar')
-    .addColumn('entity_id', 'uuid')
+    .addColumn('entity_id', 'varchar')
     .addColumn('name', 'varchar')
     .addColumn('date_created', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .execute()

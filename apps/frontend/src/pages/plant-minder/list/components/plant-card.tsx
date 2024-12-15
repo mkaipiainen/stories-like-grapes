@@ -1,7 +1,7 @@
 import {ActionIcon, Badge, Card, Group, Image, LoadingOverlay, Text} from "@mantine/core";
 import {S3Image} from "@/src/components/s3-image.tsx";
 import {Link} from "react-router-dom";
-import {Plant} from "@api/src/db/types/plant";
+import {PlantWithTagsAndImages} from "@api/src/db/types/plant";
 import {useEffect, useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faDroplet, faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import {match} from "ts-pattern";
 import {useDissolve} from "@/src/hooks/dissolve/use-dissolve.tsx";
 export function PlantCard(props: {
-	plant: Plant
+	plant: PlantWithTagsAndImages
 }) {
 	const card = useRef<HTMLDivElement>(null);
 	const dissolve = useDissolve();
