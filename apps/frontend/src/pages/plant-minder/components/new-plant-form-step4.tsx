@@ -1,26 +1,22 @@
-import {useForm, UseFormReturn} from 'react-hook-form';
-import {Dispatch, SetStateAction, useRef} from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import { Dispatch, SetStateAction, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
-import {
-  Button,
-  Group,
-  Text
-} from '@mantine/core';
+import { Button, Group, Text } from '@mantine/core';
 import { useDissolve } from '@/src/hooks/dissolve/use-dissolve.tsx';
 import { useNavigate } from 'react-router-dom';
-import {trpc} from "@/src/util/trpc.ts";
-import {notifications} from "@mantine/notifications";
-import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
-import {Dropzone, IMAGE_MIME_TYPE} from "@mantine/dropzone";
-import {faCamera, faCancel} from "@fortawesome/free-solid-svg-icons";
-import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
-import {Step} from "@/src/stores/slices/new-plant-slice.ts";
-import {ENTITY_TYPE} from "@api/src/constants/entity.constant.ts";
-import {UseFileUpload} from "@/src/hooks/use-file-upload.tsx";
+import { trpc } from '@/src/util/trpc.ts';
+import { notifications } from '@mantine/notifications';
+import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { faCamera, faCancel } from '@fortawesome/free-solid-svg-icons';
+import { NewPlantFormInputs } from '@/src/pages/plant-minder/components/new-plant-form.tsx';
+import { Step } from '@/src/stores/slices/new-plant-slice.ts';
+import { ENTITY_TYPE } from '@api/src/constants/entity.constant.ts';
+import { UseFileUpload } from '@/src/hooks/use-file-upload.tsx';
 
 export function NewPlantFormStep4(props: {
-  form: UseFormReturn<NewPlantFormInputs>,
+  form: UseFormReturn<NewPlantFormInputs>;
   setTransitionTarget: Dispatch<SetStateAction<Step>>;
 }) {
   const step4 = useRef<HTMLFormElement | null>(null);
@@ -29,31 +25,33 @@ export function NewPlantFormStep4(props: {
   const { handleSubmit } = useForm();
   const plantMutation = trpc.plant.create.useMutation();
   const tagMutation = trpc.tag.create.useMutation();
-  const uploadFile = UseFileUpload();
+  const { doUpload } = UseFileUpload();
   async function onSubmit() {
     try {
       const data = props.form.getValues();
       const plant = await plantMutation.mutateAsync({
         description: data.description,
         name: data.name,
-        watering_frequency: parseInt(data.wateringFrequency)
-      })
+        watering_frequency: parseInt(data.wateringFrequency),
+      });
       const image = props.form.getValues('image');
       const tags = props.form.getValues('tags');
-      if(image) {
-        await uploadFile(image, {
+      if (image) {
+        await doUpload(image, {
           id: plant.id,
           type: ENTITY_TYPE.PLANT,
         });
       }
-      if(tags) {
-        await Promise.all(tags.map(tag => {
-          return tagMutation.mutateAsync({
-            name: tag,
-            entityId: plant.id,
-            entityType: ENTITY_TYPE.PLANT,
-          })
-        }))
+      if (tags) {
+        await Promise.all(
+          tags.map((tag) => {
+            return tagMutation.mutateAsync({
+              name: tag,
+              entityId: plant.id,
+              entityType: ENTITY_TYPE.PLANT,
+            });
+          }),
+        );
       }
 
       notifications.show({
@@ -61,7 +59,9 @@ export function NewPlantFormStep4(props: {
         message: 'Added a new plant!',
         color: 'green',
         position: 'top-center',
-        icon: <FontAwesomeIcon color={'white'} icon={faCheck}></FontAwesomeIcon>,
+        icon: (
+          <FontAwesomeIcon color={'white'} icon={faCheck}></FontAwesomeIcon>
+        ),
         autoClose: 2000,
       });
       setTimeout(() => {
@@ -73,14 +73,16 @@ export function NewPlantFormStep4(props: {
           navigate('/plant-minder/list');
         });
       }, 1000);
-    } catch(e) {
-      console.log("Error:", e);
+    } catch (e) {
+      console.log('Error:', e);
       notifications.show({
         title: 'Error!',
         message: 'There was an error adding the new plant.',
         color: 'red',
         position: 'top-center',
-        icon: <FontAwesomeIcon color={'white'} icon={faCancel}></FontAwesomeIcon>,
+        icon: (
+          <FontAwesomeIcon color={'white'} icon={faCancel}></FontAwesomeIcon>
+        ),
         autoClose: 2000,
       });
     }
@@ -93,14 +95,19 @@ export function NewPlantFormStep4(props: {
       ref={step4}
     >
       <Dropzone
-          onDrop={(files) => {
-            props.form.setValue('image', files[0]);
-          }}
-          onReject={(files) => console.log('rejected files', files)}
-          maxSize={5 * 1024 ** 2}
-          accept={IMAGE_MIME_TYPE}
+        onDrop={(files) => {
+          props.form.setValue('image', files[0]);
+        }}
+        onReject={(files) => console.log('rejected files', files)}
+        maxSize={5 * 1024 ** 2}
+        accept={IMAGE_MIME_TYPE}
       >
-        <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
+        <Group
+          justify="center"
+          gap="xl"
+          mih={220}
+          style={{ pointerEvents: 'none' }}
+        >
           <Dropzone.Accept>
             <FontAwesomeIcon size={'xl'} icon={faCheck}></FontAwesomeIcon>
           </Dropzone.Accept>

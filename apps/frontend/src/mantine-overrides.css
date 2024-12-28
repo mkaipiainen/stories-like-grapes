@@ -1,0 +1,8 @@
+.mantine-Popover-dropdown.mantine-MultiSelect-dropdown {
+    background-color: var(--color-background-primary);
+}
+
+:where([data-mantine-color-scheme='light']) .m_92253aa5:hover:where(:not([data-combobox-selected], [data-combobox-disabled])) {
+    background-color: var(--color-background-primary-900) !important;
+    transition: background-color 0.3s;
+}

@@ -12,7 +12,7 @@ import { Layout } from '@/src/layout.tsx';
 import { PlantMinderListPage } from '@/src/pages/plant-minder/list/plant-minder.list.page.tsx';
 import { PlantMinderCreatePage } from '@/src/pages/plant-minder/create/plant-minder.create.page.tsx';
 import { PlantMinderRedirect } from '@/src/pages/plant-minder/plant-minder-redirect.tsx';
-import { PlantMinderDetailPage } from '@/src/pages/plant-minder/detail/plant-minder.create.page.tsx';
+import { PlantMinderDetailPage } from '@/src/pages/plant-minder/detail/plant-minder.detail.page.tsx';
 import {LandingPage} from "@/src/pages/landing/landing.page.tsx";
 import {AppWrapper} from "@/src/app-wrapper.tsx";
 

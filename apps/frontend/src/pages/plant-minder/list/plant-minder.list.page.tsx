@@ -8,12 +8,14 @@ import {PlantCard} from "@/src/pages/plant-minder/list/components/plant-card.tsx
 import {UseHasRoles} from "@/src/hooks/use-has-roles.ts";
 import {GUID} from "@/src/util/guid.ts";
 import {ENTITY_TYPE} from "@api/src/constants/entity.constant.ts";
+import {useState} from "react";
 
 export function PlantMinderListPage() {
   const trpcContext = trpc.useUtils();
   const isAdmin = UseHasRoles(['Admin'])
   const { isLoading, data } = trpc.plant.list.useQuery();
   const testPushMutation = trpc.subscription.test.useMutation();
+  const [activePlantId, setActivePlantId] = useState<string | null>(null);
   const createPlantMutation = trpc.plant.create.useMutation({
     onSettled: async () => {
       await trpcContext.plant.list.invalidate();
@@ -54,7 +56,12 @@ export function PlantMinderListPage() {
       )}
       <div className={'flex flex-col h-full w-full items-center'}>
           <div className={'flex items-center flex-wrap flex-grow'}>
-            {data?.map((plant) => <PlantCard key={plant.id} plant={plant}></PlantCard>)}
+            {data?.map((plant) =>
+              <Link key={plant.id} to={`/plant-minder/detail/${plant.id}`} viewTransition={true} onClick={() => setActivePlantId(plant.id)} >
+                <div style={{viewTransitionName: activePlantId === plant.id ? 'bg' : "none"}}>
+                  <PlantCard key={plant.id} plant={plant}></PlantCard>
+                </div>
+              </Link>)}
           </div>
           <div className={'horizontal-divider'}>
           </div>

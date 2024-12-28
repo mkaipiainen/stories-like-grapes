@@ -10,7 +10,61 @@ import { Notifications } from '@mantine/notifications';
 import superjson from 'superjson';
 
 const theme = createTheme({
-  /** Put your mantine theme override here */
+  colors: {
+    primary: [
+      '#f2f8e7',
+      '#ddecc3',
+      '#c6e09c',
+      '#afd373',
+      '#9dca52',
+      '#8cc130',
+      '#7cb128',
+      '#679d1e',
+      '#538a14',
+      '#2c6800',
+    ],
+    secondary: [
+      '#fbfae6',
+      '#f5f2c2',
+      '#eee89b',
+      '#e8e075',
+      '#e4da5a',
+      '#e1d442',
+      '#dec33c',
+      '#dbad34',
+      '#d7972b',
+      '#cf721d',
+    ],
+    tertiary: [
+      '#e0f2f2',
+      '#b2dfde',
+      '#80cbc9',
+      '#4db6b2',
+      '#26a6a0',
+      '#00968f',
+      '#008981',
+      '#017971',
+      '#036961',
+      '#044d44',
+    ],
+    background: [
+      '#fbf7ea',
+      '#efd6a5',
+      '#e3bc6b',
+      '#d9a22c',
+      '#d28f00',
+      '#cd7d00',
+      '#ca7300',
+      '#c66400',
+      '#c05400',
+      '#b83900',
+    ],
+  },
+  primaryColor: 'primary',
+  fontFamily: 'Cabin, sans-serif',
+  headings: {
+    fontFamily: 'Libre Franklin, sans-serif',
+  },
 });
 export const Layout: FC<{ children: any }> = ({ children }) => {
   const { getAccessTokenSilently } = useAuth0();

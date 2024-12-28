@@ -4,7 +4,10 @@
 node_modules
 .pnp
 .pnp.js
-
+dev-dist
+.terraform
+*tfstate*
+.terraform.lock*
 # Local env files
 .env
 .env.local

@@ -15,14 +15,10 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
 import {Step} from "@/src/stores/slices/new-plant-slice.ts";
-import {TAGS} from "@/src/constants/tags.ts";
+import {TAG_OPTIONS, TAGS} from "@/src/constants/tags.ts";
 type Inputs = {
   description: string;
 };
-
-const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
-  TAGS,
-) as unknown as (keyof typeof TAGS)[];
 
 export function NewPlantFormStep3(props: {
   form: UseFormReturn<NewPlantFormInputs>,

@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 
 export function PlantMinderPage() {
   return (
-    <div className={'flex flex-col h-full w-full'}>
+    <div className={'flex flex-col h-full w-full max-w-5xl'}>
       <Outlet></Outlet>
     </div>
   );

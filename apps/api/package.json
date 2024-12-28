@@ -38,6 +38,7 @@
     "node-jose": "^2.2.0",
     "node-schedule": "^2.1.1",
     "pg": "^8.13.1",
+    "rambda": "^9.3.0",
     "superjson": "^2.2.2",
     "ts-pattern": "^5.5.0",
     "ts-results": "^3.3.0",

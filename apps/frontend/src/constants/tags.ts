@@ -22,5 +22,7 @@ export const TAGS: Record<string, { label: string; icon: IconDefinition }> = {
 		icon: faSprayCanSparkles,
 	},
 } as const;
-
+export const TAG_OPTIONS: (keyof typeof TAGS)[] = Object.keys(
+	TAGS,
+) as unknown as (keyof typeof TAGS)[];
 export type PlantTag = keyof typeof TAGS;

@@ -3,6 +3,8 @@
   "include": ["./src/**/*"],
   "compilerOptions": {
     "baseUrl": ".",
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
     "paths": {
       "@/*": ["./*"],
       "@api/*": ["../api/*"]
