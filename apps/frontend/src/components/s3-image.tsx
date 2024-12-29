@@ -25,6 +25,7 @@ export const S3Image: FC<{
         ></LoadingOverlay>
       ) : (
         <Image
+          ref={props.ref}
           onClick={onClick}
           className={'object-cover h-full'}
           src={data}

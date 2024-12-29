@@ -16,6 +16,7 @@ export type PlantTable = {
   description: string | undefined;
   next_watering_date: Date | undefined;
   user_id: string;
+  main_image_id: string | undefined;
 };
 
 export type Plant = Selectable<PlantTable>;

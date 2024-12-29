@@ -6,3 +6,7 @@
     background-color: var(--color-background-primary-900) !important;
     transition: background-color 0.3s;
 }
+
+.mantine-Button-label {
+    font-weight: normal;
+}

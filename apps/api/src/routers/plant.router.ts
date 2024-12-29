@@ -94,6 +94,7 @@ export default router({
         description: z.optional(z.string()),
         tags: z.optional(z.array(z.string())),
         watering_frequency: z.optional(z.number()),
+        main_image_id: z.optional(z.string()),
       }),
     )
     .mutation(async (opts) => {

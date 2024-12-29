@@ -79,7 +79,7 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
 
   return (
     <div className={getCardClass()} ref={card}>
-      {deleteMutation.isLoading ? (
+      {deleteMutation.isPending ? (
         <LoadingOverlay
           visible={true}
           zIndex={1000}

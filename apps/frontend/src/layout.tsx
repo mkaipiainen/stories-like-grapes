@@ -76,16 +76,15 @@ export const Layout: FC<{ children: any }> = ({ children }) => {
       links: [
         httpBatchLink({
           url: `${isProduction ? window.location.origin : 'http://localhost:4201'}/trpc`,
-          // You can pass any HTTP headers you wish here
           async headers() {
             const token = await getAccessTokenSilently();
             return {
               authorization: `Bearer ${token}`,
             };
           },
+          transformer: superjson,
         }),
       ],
-      transformer: superjson,
     }),
   );
   return (

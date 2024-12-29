@@ -1,10 +1,8 @@
 import { trpc } from '@/src/util/trpc.ts';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ActionIcon,
   Button,
   Group,
-  Image,
   Loader,
   LoadingOverlay,
   MultiSelect,
@@ -21,22 +19,15 @@ import { TAG_OPTIONS, TAGS } from '@/src/constants/tags.ts';
 import { useQuill } from 'react-quilljs';
 import { useDissolve } from '@/src/hooks/dissolve/use-dissolve.tsx';
 import { notifications } from '@mantine/notifications';
-import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-image.tsx';
 import { equals } from 'rambda';
 import { useDebouncedCallback } from '@mantine/hooks';
 import {
   PlantUpdateData,
   PlantWithTagsAndImages,
 } from '@api/src/db/types/plant';
-import { Image as DbImage } from '@api/src/db/types/image';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { AsNumber } from '@/src/util/to-number.ts';
-import { S3Image } from '@/src/components/s3-image.tsx';
-import { faImage, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Dropzone, FileWithPath } from '@mantine/dropzone';
-import { ENTITY_TYPE } from '@api/src/constants/entity.constant.ts';
-import { UseFileUpload } from '@/src/hooks/use-file-upload.tsx';
-import useSwapAnimation from '@/src/hooks/use-swap-animation.tsx';
+import { ImageManager } from '@/src/pages/plant-minder/detail/components/image-manager.tsx';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -46,8 +37,10 @@ export function PlantMinderDetailPage() {
   const utils = trpc.useUtils();
   const { id } = useParams<{ id: string }>();
 
-  const { data, isLoading } = trpc.plant.get.useQuery(id ?? '', {
-    onSuccess: (data) => {
+  const { data, isLoading, isSuccess } = trpc.plant.get.useQuery(id ?? '');
+
+  useEffect(() => {
+    if (isSuccess) {
       setTimeout(() => {
         if (!isInited.current) {
           setEditableFields(getEditableFieldsFromData(data));
@@ -55,42 +48,15 @@ export function PlantMinderDetailPage() {
           isInited.current = true;
         }
       });
-    },
-  });
-  trpc.image.getByEntity.useQuery(
-    {
-      entityType: ENTITY_TYPE.PLANT,
-      entityId: id ?? '',
-    },
-    {
-      onSuccess: (data) => {
-        setImages({
-          selectedImage: data[0],
-          images: data,
-        });
-      },
-    },
-  );
+    }
+  }, [isSuccess]);
+
   const updateMutation = trpc.plant.update.useMutation({
     onMutate: () => {
       doInvalidate();
     },
   });
-  const [imageAnimationTarget, setImageAnimationTarget] = useState<
-    DbImage | undefined
-  >(undefined);
-  const [images, setImages] = useState<{
-    selectedImage: DbImage | undefined;
-    images: DbImage[];
-  }>({
-    selectedImage: undefined,
-    images: [],
-  });
-  const placeholderImage = UsePlantPlaceholderImage(data);
-  const swapAnimation = useSwapAnimation({
-    duration: 5000,
-    easing: 'power2.inOut',
-  });
+
   const [editableFields, setEditableFields] = useState<
     Required<PlantUpdateData>
   >({
@@ -103,7 +69,6 @@ export function PlantMinderDetailPage() {
   const { quill, quillRef } = useQuill();
 
   const container = useRef(null);
-  const { doUpload, isUploadLoading } = UseFileUpload();
 
   useEffect(() => {
     if (quill && quill.root.innerHTML !== editableFields?.description) {
@@ -135,6 +100,21 @@ export function PlantMinderDetailPage() {
   }, [quill, editableFields]);
 
   const doWaterMutation = trpc.plant.water.useMutation({
+    onSuccess: () => {
+      notifications.show({
+        position: 'top-right',
+        title: 'Plant watered!',
+        message: 'Plant was watered succesfully',
+      });
+    },
+    onError: () => {
+      notifications.show({
+        position: 'top-right',
+        color: 'red',
+        title: 'Failed to water plant',
+        message: 'There was an error watering the plant',
+      });
+    },
     onSettled: () => {
       doInvalidate();
     },
@@ -229,18 +209,6 @@ export function PlantMinderDetailPage() {
     };
   }
 
-  function doUploadImage(files: FileWithPath[]) {
-    if (!data) {
-      throw new Error('No entity set, could not upload image');
-    }
-    doUpload(files[0], {
-      id: data.id,
-      type: ENTITY_TYPE.PLANT,
-    }).then(() => {
-      utils.image.getByEntity.invalidate();
-    });
-  }
-
   return (
     <>
       {isLoading ? (
@@ -265,82 +233,19 @@ export function PlantMinderDetailPage() {
             className={'flex w-full items-center flex-col box-border p-4'}
           >
             <div className={'flex flex-col items-center md:flex-row w-full'}>
-              <Group className={'basis-1/2'} wrap={'nowrap'}>
-                {/*<Image*/}
-                {/*  style={{ viewTransitionName: 'plant-image' }}*/}
-                {/*  src={placeholderImage}*/}
-                {/*  height={160}*/}
-                {/*  alt="Plant image placeholder"*/}
-                {/*  className={'object-contain w-40 h-40'}*/}
-                {/*/>*/}
-                <S3Image
-                  ref={swapAnimation.element1Ref}
-                  id={images.selectedImage?.id}
-                  className={
-                    'object-cover cursor-pointer hover:shadow-md hover:outline-1 transition w-40 h-40'
-                  }
-                />
-                <Group wrap={'wrap'}>
-                  {images.images.map((image) => {
-                    return (
-                      <S3Image
-                        onClick={() => {
-                          setImageAnimationTarget(image);
-                          swapAnimation.animateSwap().then(() => {
-                            setImages({
-                              images: images.images,
-                              selectedImage: image,
-                            });
-                          });
-                        }}
-                        ref={
-                          imageAnimationTarget?.id === image.id
-                            ? swapAnimation.element2Ref
-                            : undefined
-                        }
-                        key={image.id}
-                        id={image.id}
-                        className={
-                          'object-cover cursor-pointer hover:shadow-md hover:outline-1 transition w-12 h-12'
-                        }
-                      />
-                    );
-                  })}
-                  {isUploadLoading ? (
-                    <Loader type={'bars'} size={'sm'}></Loader>
-                  ) : (
-                    <Dropzone onDrop={doUploadImage}>
-                      <Dropzone.Idle>
-                        <ActionIcon
-                          color="rgba(0, 0, 0, 0.2)"
-                          variant="filled"
-                          aria-label="Add an image"
-                          className={'relative'}
-                        >
-                          <>
-                            <FontAwesomeIcon icon={faImage}></FontAwesomeIcon>
-                            <FontAwesomeIcon
-                              className={'absolute top-0 right-0'}
-                              color={'rgba(0, 0, 0, 0.4)'}
-                              icon={faPlus}
-                              size={'sm'}
-                            ></FontAwesomeIcon>
-                          </>
-                        </ActionIcon>
-                      </Dropzone.Idle>
-                    </Dropzone>
-                  )}
-                </Group>
-              </Group>
-
+              {!data ? (
+                <LoadingOverlay />
+              ) : (
+                <ImageManager plant={data}></ImageManager>
+              )}
               <div
                 className={
                   'horizontal-divider md:vertical-divider bg-primary-400'
                 }
               ></div>
-              <div className={'flex flex-col basis-1/2'}>
+              <div className={'flex flex-col basis-1/2 w-full'}>
                 <div className={'w-full h-12 flex items-center p-4 box-border'}>
-                  {updateMutation.isLoading ? (
+                  {updateMutation.isPending ? (
                     <div className={'flex items-center mb-4'}>
                       <Loader size={'sm'}></Loader>
                     </div>
@@ -371,6 +276,25 @@ export function PlantMinderDetailPage() {
                   label={'Name'}
                   required={true}
                 ></TextInput>
+                <div className="flex items-center p-4">
+                  <span className="text-nowrap mr-4 flex items-center">
+                    Water every{' '}
+                  </span>
+                  <NumberInput
+                    className={'mr-4 flex items-center'}
+                    value={editableFields.watering_frequency}
+                    min={0}
+                    max={undefined}
+                    onChange={(value) => {
+                      setEditableFields({
+                        ...editableFields,
+                        watering_frequency: AsNumber(value),
+                      });
+                    }}
+                    required={true}
+                  ></NumberInput>
+                  <span className={'flex items-center'}>days</span>
+                </div>
               </div>
             </div>
           </Paper>
@@ -394,35 +318,7 @@ export function PlantMinderDetailPage() {
               data={TAG_OPTIONS}
               renderOption={renderMultiSelectOption}
             />
-            <div className="flex mt-4 items-center">
-              <span className="text-nowrap mr-4 flex items-center">
-                Water every{' '}
-              </span>
-              <NumberInput
-                className={'mr-4 flex items-center'}
-                value={editableFields.watering_frequency}
-                min={0}
-                max={undefined}
-                onChange={(value) => {
-                  setEditableFields({
-                    ...editableFields,
-                    watering_frequency: AsNumber(value),
-                  });
-                }}
-                required={true}
-              ></NumberInput>
-              <span className={'flex items-center'}>days</span>
-            </div>
-          </Paper>
-          <div className={'horizontal-divider bg-primary-800'}></div>
-
-          <Paper
-            className={'flex w-full flex-col p-4'}
-            style={{
-              filter:
-                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-            }}
-          >
+            <div className={'horizontal-divider bg-primary-800 my-4'}></div>
             <div className="min-h-40 w-full" ref={quillRef} />
           </Paper>
           <div className={'horizontal-divider bg-primary-800'}></div>
@@ -433,15 +329,21 @@ export function PlantMinderDetailPage() {
                 'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
             }}
           >
-            <Button color={'green'} onClick={() => onDoWater()}>
-              Water
-            </Button>
-            <Button
-              color={'red'}
-              onClick={() => deleteMutation.mutate(data!.id)}
-            >
-              Delete
-            </Button>
+            <Group justify={'flex-end'}>
+              <Button
+                className={'mr-2'}
+                color={'green'}
+                onClick={() => onDoWater()}
+              >
+                Water
+              </Button>
+              <Button
+                color={'red'}
+                onClick={() => deleteMutation.mutate(data!.id)}
+              >
+                Delete
+              </Button>
+            </Group>
           </Paper>
           <PaperDistort filterId={'bg-filter'}></PaperDistort>
         </div>

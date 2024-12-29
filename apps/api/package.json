@@ -22,7 +22,7 @@
     "@aws-sdk/protocol-http": "^3.374.0",
     "@aws-sdk/s3-request-presigner": "^3.709.0",
     "@aws-sdk/url-parser": "^3.374.0",
-    "@trpc/server": "^10.45.2",
+    "@trpc/server": "11.0.0-rc.677",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "cookie-parser": "^1.4.7",

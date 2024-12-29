@@ -133,7 +133,7 @@ export function NewPlantFormStep4(props: {
         className={
           'hover:bg-primary-800 transition-colors cursor-pointer w-full mt-4'
         }
-        disabled={plantMutation.isLoading}
+        disabled={plantMutation.isPending}
         variant="outline"
         size="icon"
       >

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import gsap from 'gsap';
+import { gsap } from 'gsap';
 
 /**
  * A hook to handle smooth animations for swapping two elements
@@ -9,14 +9,19 @@ import gsap from 'gsap';
  * @param {string} config.easing - GSAP easing for the animation
  * @returns {Object} - { animateSwap, largeImageRef, thumbnailRef }
  */
-const useSwapAnimation = ({ duration = 0.5, easing = 'power2.inOut' } = {}) => {
-  const element1Ref = useRef<any>();
-  const element2Ref = useRef<any>();
+const useSwapAnimation = ({
+  duration = 0.5,
+  easing = 'power2.inOut',
+  arePropsCleared = false,
+} = {}) => {
+  const element1Ref = useRef<any>(null);
+  const element2Ref = useRef<any>(null);
 
   const animateSwap = () => {
     return new Promise<void>((resolve, reject) => {
       const element1 = element1Ref.current;
       const element2 = element2Ref.current;
+      console.log(element1, element2);
       if (!element1 || !element2) {
         reject();
         throw new Error('No references set, therefore could not animate');
@@ -27,32 +32,44 @@ const useSwapAnimation = ({ duration = 0.5, easing = 'power2.inOut' } = {}) => {
 
       const deltaX = largeImageBox.x - thumbnailBox.x;
       const deltaY = largeImageBox.y - thumbnailBox.y;
-      const scale = largeImageBox.width / thumbnailBox.width;
+      const scaleX = largeImageBox.width / thumbnailBox.width;
+      const scaleY = largeImageBox.height / thumbnailBox.height;
+      gsap.set(element1, { transformOrigin: 'top left' });
+      gsap.set(element2, { transformOrigin: 'top left' });
 
-      const tl = gsap.timeline({
-        onComplete: () => {
-          resolve();
-          gsap.set(element1, { clearProps: 'all' });
-        },
-      });
+      gsap
+        .timeline({
+          onComplete: () => {
+            if (arePropsCleared) {
+              gsap.set(element1, { clearProps: 'all' });
+              gsap.set(element2, { clearProps: 'all' });
+            }
 
-      tl.to(element2, {
-        x: deltaX,
-        y: deltaY,
-        scale,
-        duration,
-        ease: easing,
-      }).to(
-        element1,
-        {
-          opacity: 0,
-          duration: duration / 2,
-        },
-        0,
-      );
+            resolve();
+          },
+        })
+        .to(element2, {
+          x: deltaX,
+          y: deltaY,
+          scaleX,
+          scaleY,
+          duration,
+          ease: easing,
+        })
+        .to(
+          element1,
+          {
+            x: deltaX * -1,
+            y: deltaY * -1,
+            scaleX: 1 / scaleX,
+            scaleY: 1 / scaleY,
+            duration,
+            ease: easing,
+          },
+          0, // start this animation at the same time as the previous one
+        );
     });
   };
-
   return { animateSwap, element1Ref, element2Ref };
 };
 
