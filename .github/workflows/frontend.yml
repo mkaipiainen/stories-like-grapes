@@ -47,12 +47,6 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
           file: ./Dockerfile.frontend
-        env:
-          VITE_AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
-          VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
-          VITE_VAPID_KEY_PUBLIC: ${{ secrets.VAPID_KEY_PUBLIC }}
-          VITE_AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-          VITE_AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
 
       - name: Get and store Droplet IP
         run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
@@ -73,7 +67,13 @@ jobs:
           docker rm -f slg-frontend
           docker rmi ghcr.io/${{ github.repository_owner }}/slg-frontend:latest || true
           docker pull ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
-          docker run --restart unless-stopped -d -p 8050:80 --name slg-frontend --network app-default ghcr.io/${{ github.repository_owner }}/slg-frontend:latest 
+          docker run --restart unless-stopped -d -p 8050:80 --name slg-frontend --network app-default \
+          -e VITE_AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
+          -e VITE_AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+          -e VITE_VAPID_KEY_PUBLIC=${{ secrets.VAPID_KEY_PUBLIC }} \
+          -e VITE_AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} \
+          -e VITE_AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+          ghcr.io/${{ github.repository_owner }}/slg-frontend:latest
           EOF
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
