@@ -9,6 +9,7 @@ export type ImageTable = {
   filename: string | undefined;
   mime_type: string | undefined;
   date_created: ColumnType<Date, never, never>;
+  is_main_image: boolean;
 };
 
 export type Image = Selectable<ImageTable>;

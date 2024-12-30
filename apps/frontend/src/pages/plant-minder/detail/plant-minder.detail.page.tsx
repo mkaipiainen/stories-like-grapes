@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Button,
   Group,
+  Image,
   Loader,
   LoadingOverlay,
   MultiSelect,
@@ -12,7 +13,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PaperDistort } from '@/src/components/paper-distort.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TAG_OPTIONS, TAGS } from '@/src/constants/tags.ts';
@@ -28,6 +29,8 @@ import {
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { AsNumber } from '@/src/util/to-number.ts';
 import { ImageManager } from '@/src/pages/plant-minder/detail/components/image-manager.tsx';
+import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-image.tsx';
+import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -38,7 +41,13 @@ export function PlantMinderDetailPage() {
   const { id } = useParams<{ id: string }>();
 
   const { data, isLoading, isSuccess } = trpc.plant.get.useQuery(id ?? '');
+  const users = trpc.auth.list.useQuery();
+  const placeholderImage = UsePlantPlaceholderImage(data);
+  const mood = UsePlantMood(data);
 
+  useEffect(() => {
+    console.log(users.data);
+  }, [users.data]);
   useEffect(() => {
     if (isSuccess) {
       setTimeout(() => {
@@ -209,6 +218,18 @@ export function PlantMinderDetailPage() {
     };
   }
 
+  const getWateringText = useCallback(() => {
+    if (mood.daysUntilWatering > 0) {
+      return `Water in ${mood.daysUntilWatering} days`;
+    } else {
+      if (mood.daysSinceWatering > 0) {
+        return `Water today - ${mood.daysSinceWatering} overdue!`;
+      } else {
+        return 'Water today!';
+      }
+    }
+  }, [mood]);
+
   return (
     <>
       {isLoading ? (
@@ -230,6 +251,60 @@ export function PlantMinderDetailPage() {
                 'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
               viewTransitionName: 'bg',
             }}
+            className={
+              'relative flex w-full items-center flex-col box-border p-4 mb-4'
+            }
+          >
+            <div
+              className={
+                'flex absolute top-0 right-0 items-center p-4 box-border'
+              }
+            >
+              {updateMutation.isPending ? (
+                <div className={'flex items-center'}>
+                  <Loader size={'sm'}></Loader>
+                </div>
+              ) : (
+                <div className={'flex items-center'}>
+                  <FontAwesomeIcon
+                    className={'mr-4'}
+                    icon={faCheck}
+                    color={'green'}
+                  ></FontAwesomeIcon>
+                  <Text size={'sm'} c={'green'}>
+                    Updated
+                  </Text>
+                </div>
+              )}
+            </div>
+            <Group className={'w-full'}>
+              <Group>
+                <Image
+                  src={placeholderImage}
+                  height={80}
+                  alt="Plant image placeholder"
+                  className={'object-contain h-32 w-32'}
+                />
+                <Text>{getWateringText()}</Text>
+                <Group className={'flex flex-col'}>
+                  <Button
+                    className={'mr-2'}
+                    color={'green'}
+                    onClick={() => onDoWater()}
+                  >
+                    Water
+                  </Button>
+                  <Text size={'sm'}>Last watered by </Text>
+                </Group>
+              </Group>
+            </Group>
+          </Paper>
+          <Paper
+            style={{
+              filter:
+                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+              viewTransitionName: 'bg',
+            }}
             className={'flex w-full items-center flex-col box-border p-4'}
           >
             <div className={'flex flex-col items-center md:flex-row w-full'}>
@@ -244,25 +319,6 @@ export function PlantMinderDetailPage() {
                 }
               ></div>
               <div className={'flex flex-col basis-1/2 w-full'}>
-                <div className={'w-full h-12 flex items-center p-4 box-border'}>
-                  {updateMutation.isPending ? (
-                    <div className={'flex items-center mb-4'}>
-                      <Loader size={'sm'}></Loader>
-                    </div>
-                  ) : (
-                    <div className={'flex items-center mb-4'}>
-                      <FontAwesomeIcon
-                        className={'mr-4'}
-                        icon={faCheck}
-                        color={'green'}
-                      ></FontAwesomeIcon>
-                      <Text size={'sm'} c={'green'}>
-                        Updated
-                      </Text>
-                    </div>
-                  )}
-                </div>
-
                 <TextInput
                   autoComplete="off"
                   className={'p-4 w-full'}
@@ -330,13 +386,6 @@ export function PlantMinderDetailPage() {
             }}
           >
             <Group justify={'flex-end'}>
-              <Button
-                className={'mr-2'}
-                color={'green'}
-                onClick={() => onDoWater()}
-              >
-                Water
-              </Button>
               <Button
                 color={'red'}
                 onClick={() => deleteMutation.mutate(data!.id)}

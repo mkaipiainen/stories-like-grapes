@@ -8,6 +8,11 @@ import { sql } from 'kysely';
 import dayjs from 'dayjs';
 import { protectedProcedure } from '../procedures/protected.procedure';
 import { omit } from 'rambda';
+import { plantService } from '../services/plant.service';
+import { TRPCError } from '@trpc/server';
+import { auditService } from '../services/audit.service';
+import { ACTIONS } from '../constants/audit.constant';
+import type { Plant } from '../db/types/plant';
 export default router({
   list: protectedProcedure.query(async () => {
     return await db
@@ -64,23 +69,23 @@ export default router({
   }),
 
   water: protectedProcedure.input(z.string()).mutation(async (opts) => {
-    const plant = await db
-      .selectFrom('plant')
-      .select('watering_frequency')
-      .where('id', '=', opts.input)
-      .executeTakeFirstOrThrow();
-    const nextWateringDate = dayjs(new Date()).add(
-      plant.watering_frequency ?? 0,
-      'day',
+    return await auditService.withAudit<Plant>(
+      {
+        userId: opts.ctx.userId,
+        table: 'plant',
+        id: opts.input,
+        action: ACTIONS.WATER,
+      },
+      async () => {
+        const plant = await db
+          .selectFrom('plant')
+          .selectAll()
+          .where('id', '=', opts.input)
+          .executeTakeFirstOrThrow();
+        const updatedPlant = await plantService.updateNextWateringDate(plant);
+        return updatedPlant;
+      },
     );
-    const updatedPlant = await db
-      .updateTable('plant')
-      .where('id', '=', opts.input)
-      .set('last_watered', sql`now()`)
-      .set('next_watering_date', nextWateringDate.toDate())
-      .returningAll()
-      .execute();
-    return updatedPlant;
   }),
   delete: protectedProcedure.input(z.string()).mutation(async (opts) => {
     await entityService.hardDelete(ENTITY_TYPE.PLANT, opts.input);
@@ -98,17 +103,24 @@ export default router({
       }),
     )
     .mutation(async (opts) => {
-      console.log('Updating', opts.input, omit(['tags'], opts.input));
-      await db
+      const plant = await db
         .updateTable('plant')
         .set(omit(['tags'], opts.input))
         .where('id', '=', opts.input.id)
+        .returningAll()
         .execute();
+      if (!plant[0]) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Could not find a plant for the given ID',
+        });
+      }
       await entityService.updatePolymorphicRelationships({
         entityType: ENTITY_TYPE.PLANT,
         entityId: opts.input.id,
         tags: opts.input.tags,
       });
+      await plantService.updateNextWateringDate(plant[0]);
       return await GetPlant(opts.input.id);
     }),
 });

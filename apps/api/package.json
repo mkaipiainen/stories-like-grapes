@@ -8,7 +8,7 @@
   "scripts": {
     "migrate": "node ./src/db/migrate.mjs",
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
-    "dev": "nodemon --env-file ./.env --watch src --ext ts --exec tsx src/index.ts -L"
+    "dev": "nodemon --env-file .env --watch src --ext ts --exec tsx src/index.ts -L"
   },
   "exports": {
     "./router": "./src/router.ts"

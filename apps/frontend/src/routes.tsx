@@ -43,14 +43,11 @@ export const Auth0ProviderWithNavigate: FC<{ children: any }> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const isProduction = import.meta.env.MODE === 'production';
-
-  const domain = 'dev-ev7m3p4bucka4la6.us.auth0.com';
-  const clientId = isProduction
-    ? 'vlPaAflsi4YGyYO7ssyEnjrQxvo4GtDs'
-    : 'lqTQ2LfvM5yyicwSy5mCq6nPiVBWSPM7';
+  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
   const redirectUri = window.location.origin;
 
+  console.log(domain, clientId, redirectUri);
   const onRedirectCallback = (appState: any) => {
     navigate(appState?.returnTo || window.location.pathname);
   };

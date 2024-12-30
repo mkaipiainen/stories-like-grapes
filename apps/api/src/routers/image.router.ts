@@ -3,38 +3,41 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { db } from '../db/db';
 import { ZodEntityType } from '../constants/entity.constant';
-import {awsService} from "../services/aws.service";
-import {GUID} from "../util/guid";
+import { awsService } from '../services/aws.service';
+import { GUID } from '../util/guid';
+import { imageService, ZCreateImageData } from '../services/image.service';
+import { protectedProcedure } from '../procedures/protected.procedure';
+import { isNil } from 'rambda';
 
 export const imageRouter = router({
-  getS3Url: publicProcedure.input(z.string()).query(async ({input: id}) => {
+  getS3Url: publicProcedure.input(z.string()).query(async ({ input: id }) => {
     const presignedUrl = await awsService.generateS3Url(id, 'GET');
-    return presignedUrl
+    return presignedUrl;
   }),
-  getById: publicProcedure
-    .input(z.string())
-    .query(async ({ input: id }) => {
-      const image = await db
-        .selectFrom('image')
-        .selectAll()
-        .where('id', '=', id)
-        .executeTakeFirst();
+  getById: publicProcedure.input(z.string()).query(async ({ input: id }) => {
+    const image = await db
+      .selectFrom('image')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
 
-      if (!image) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Image not found',
-        });
-      }
+    if (!image) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Image not found',
+      });
+    }
 
-      return image;
-    }),
+    return image;
+  }),
 
   getByEntity: publicProcedure
-    .input(z.object({
-      entityType: ZodEntityType,
-      entityId: z.string(),
-    }))
+    .input(
+      z.object({
+        entityType: ZodEntityType,
+        entityId: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const images = await db
         .selectFrom('image')
@@ -46,47 +49,71 @@ export const imageRouter = router({
       return images;
     }),
 
-  create: publicProcedure
-    .input(z.object({
-      entityType: z.optional(ZodEntityType),
-      entityId: z.optional(z.string()),
-      imageData: z.string(), // Base64 encoded image data
-      filename: z.string(),
-      mimeType: z.string().regex(/^image\//), // Ensure it starts with "image/"
-    }))
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        is_main_image: z.optional(z.boolean()),
+      }),
+    )
     .mutation(async ({ input }) => {
-      // Convert base64 to Buffer
-      const base64Data = input.imageData.split(',')[1];
-      if (!base64Data) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Invalid base64 image data',
-        });
-      }
-      const buffer = Buffer.from(base64Data, 'base64');
-      const id = GUID();
-      const url = await awsService.generateS3Url(id, 'PUT');
-      await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': input.mimeType,
-        },
-        body: buffer
-      });
-      // Insert the new image record into the database
-      const newImage = await db
-        .insertInto('image')
-        .values({
-          entity_type: input.entityType,
-          entity_id: input.entityId,
-          id: id,
-          filename: input.filename,
-          mime_type: input.mimeType,
-          url: url, // Store the S3 URL in the database
-        })
-        .returningAll()
-        .executeTakeFirst();
+      return await db.transaction().execute(async (trx) => {
+        const updatedImage = await trx
+          .updateTable('image')
+          .where('id', '=', input.id)
+          .set(input)
+          .returningAll()
+          .executeTakeFirst();
+        if (isNil(updatedImage)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Could not find an image for the given ID',
+          });
+        }
+        if (updatedImage && !isNil(input.is_main_image)) {
+          if (input.is_main_image) {
+            // Unset other main images for the same entity
+            await trx
+              .updateTable('image')
+              .set('is_main_image', false)
+              .where('id', '!=', input.id)
+              .where('entity_id', '=', updatedImage.entity_id)
+              .where('entity_type', '=', updatedImage.entity_type)
+              .where('is_main_image', '=', true)
+              .execute();
+          } else {
+            // Find another image for the same entity to set as main if this one is unset
+            const nextMainImage = await trx
+              .selectFrom('image')
+              .selectAll()
+              .where('id', '!=', input.id)
+              .where('entity_id', '=', updatedImage.entity_id)
+              .where('entity_type', '=', updatedImage.entity_type)
+              .limit(1)
+              .executeTakeFirst();
 
-      return newImage;
+            if (nextMainImage) {
+              await trx
+                .updateTable('image')
+                .set('is_main_image', true)
+                .where('id', '=', nextMainImage.id)
+                .execute();
+            } else {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message:
+                  'Could not set image to not be the main image for the entity - there are no other images to set as a new main image.',
+              });
+            }
+          }
+        }
+        return updatedImage;
+      });
+    }),
+
+  create: publicProcedure
+    .input(ZCreateImageData)
+    .mutation(async ({ input }) => {
+      return imageService.create(input);
     }),
 });
