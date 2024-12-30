@@ -9,6 +9,20 @@ RUN pnpm install
 
 # Install all dependencies fully now (including dev)
 
+# Add --build-arg to pass environment variables into the build context
+ARG VITE_AUTH0_AUDIENCE
+ARG VITE_AUTH0_CLIENT_ID
+ARG VITE_AUTH0_CLIENT_SECRET
+ARG VITE_AUTH0_DOMAIN
+ARG VITE_VAPID_KEY_PUBLIC
+
+# Expose them as environment variables during the build
+ENV VITE_AUTH0_AUDIENCE=$VITE_AUTH0_AUDIENCE
+ENV VITE_AUTH0_CLIENT_ID=$VITE_AUTH0_CLIENT_ID
+ENV VITE_AUTH0_CLIENT_SECRET=$VITE_AUTH0_CLIENT_SECRET
+ENV VITE_AUTH0_DOMAIN=$VITE_AUTH0_DOMAIN
+ENV VITE_VAPID_KEY_PUBLIC=$VITE_VAPID_KEY_PUBLIC
+
 # Run the turbo build at the root, which will build all apps in parallel
 RUN pnpm run build-frontend
 
