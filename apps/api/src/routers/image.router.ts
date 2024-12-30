@@ -10,11 +10,13 @@ import { protectedProcedure } from '../procedures/protected.procedure';
 import { isNil } from 'rambda';
 
 export const imageRouter = router({
-  getS3Url: publicProcedure.input(z.string()).query(async ({ input: id }) => {
-    const presignedUrl = await awsService.generateS3Url(id, 'GET');
-    return presignedUrl;
-  }),
-  getById: publicProcedure.input(z.string()).query(async ({ input: id }) => {
+  getS3Url: protectedProcedure
+    .input(z.string())
+    .query(async ({ input: id }) => {
+      const presignedUrl = await awsService.generateS3Url(id, 'GET');
+      return presignedUrl;
+    }),
+  getById: protectedProcedure.input(z.string()).query(async ({ input: id }) => {
     const image = await db
       .selectFrom('image')
       .selectAll()
