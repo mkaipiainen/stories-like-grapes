@@ -6,19 +6,20 @@ function AuthService() {
     const audience = process.env.AUTH0_M2M_AUDIENCE; // Auth0 Management API audience
 
     const tokenUrl = `https://${domain}/oauth/token`;
-
     // Make a POST request to get the token
-    const response = await fetch(tokenUrl, {
+    const options = {
       method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: JSON.stringify({
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
         grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
-        audience: audience,
+        client_id: clientId!,
+        client_secret: clientSecret!,
+        audience: audience!,
       }),
-    });
-    console.log(response);
+    };
+    const response = await fetch(tokenUrl, options);
 
     if (!response.ok) {
       throw new Error(
