@@ -1,8 +1,17 @@
 import { trpc } from '@/src/util/trpc.ts';
 import { FC, useEffect } from 'react';
+import { useAppDispatch } from '@/src/stores/store.ts';
+import { setUsers } from '@/src/stores/slices/auth.slice.ts';
 
 export const AppWrapper: FC<{ children: any }> = ({ children }) => {
   const subscriptionMutator = trpc.sub.subscribe.useMutation();
+  const users = trpc.auth.list.useQuery();
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (users.isSuccess) {
+      dispatch(setUsers(users.data));
+    }
+  }, [users.data, users.isSuccess]);
   useEffect(() => {
     // Ask for permission
     if ('Notification' in window && Notification.permission === 'default') {

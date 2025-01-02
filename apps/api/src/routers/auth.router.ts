@@ -1,6 +1,7 @@
 import { router } from '../trpc';
 import { protectedProcedure } from '../procedures/protected.procedure';
 import { authService } from '../services/auth.service';
+import type { RawUser } from '../db/types/auth';
 
 export const authRouter = router({
   list: protectedProcedure.query(async () => {
@@ -22,10 +23,24 @@ export const authRouter = router({
       }
 
       // Parse the JSON response
-      const users = await response.json();
-      return users;
+      const users = (await response.json()) as RawUser[];
+      return (
+        users.map((user) => {
+          return {
+            id: user.user_id,
+            name: user.name,
+            picture: user.picture,
+            last_login: user.last_login,
+            created_at: user.created_at,
+            email_verified: user.email_verified,
+            nickname: user.nickname,
+            email: user.email,
+          };
+        }) ?? []
+      );
     } catch (e) {
       console.log(e);
+      return [];
     }
   }),
 });

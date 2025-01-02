@@ -31,6 +31,7 @@ import { AsNumber } from '@/src/util/to-number.ts';
 import { ImageManager } from '@/src/pages/plant-minder/detail/components/image-manager.tsx';
 import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-image.tsx';
 import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
+import { useAppSelector } from '@/src/stores/store.ts';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -41,13 +42,25 @@ export function PlantMinderDetailPage() {
   const { id } = useParams<{ id: string }>();
 
   const { data, isLoading, isSuccess } = trpc.plant.get.useQuery(id ?? '');
-  const users = trpc.auth.list.useQuery();
+  const lastWateredById = trpc.plant.getLastWateredById.useQuery(id ?? '');
   const placeholderImage = UsePlantPlaceholderImage(data);
   const mood = UsePlantMood(data);
+  const users = useAppSelector((state) => {
+    return state.authReducer.users;
+  });
+  const [lastWateredBy, setLastWateredBy] = useState<string>('');
 
   useEffect(() => {
-    console.log(users.data);
-  }, [users.data]);
+    if (!users.length || !lastWateredById.isSuccess) {
+      setLastWateredBy('');
+    } else {
+      setLastWateredBy(
+        users.find((user) => {
+          return user.id === lastWateredById.data;
+        })?.name ?? '',
+      );
+    }
+  }, [users, lastWateredById]);
   useEffect(() => {
     if (isSuccess) {
       setTimeout(() => {
@@ -140,7 +153,7 @@ export function PlantMinderDetailPage() {
         navigate('/plant-minder');
       }
     },
-    onError: (_err, _id, context) => {
+    onError: () => {
       notifications.show({
         title: 'Error',
         message: 'There was a problem deleting the plant.',
@@ -285,7 +298,13 @@ export function PlantMinderDetailPage() {
                   alt="Plant image placeholder"
                   className={'object-contain h-32 w-32'}
                 />
-                <Text>{getWateringText()}</Text>
+                <Group className={'flex flex-col items-start justify-center'}>
+                  <Text>{getWateringText()}</Text>
+                  <Text size={'xs'}>
+                    Last watered by <b>{lastWateredBy}</b> on{' '}
+                    {data?.last_watered?.toLocaleDateString()}
+                  </Text>
+                </Group>
                 <Group className={'flex flex-col'}>
                   <Button
                     className={'mr-2'}
@@ -294,7 +313,6 @@ export function PlantMinderDetailPage() {
                   >
                     Water
                   </Button>
-                  <Text size={'sm'}>Last watered by </Text>
                 </Group>
               </Group>
             </Group>

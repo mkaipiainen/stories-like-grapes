@@ -30,6 +30,7 @@ function AuditService() {
         before: before ? JSON.stringify(before) : null,
         action: data.action,
         after: JSON.stringify(after),
+        entity_id: data.id,
       })
       .execute();
     return result;

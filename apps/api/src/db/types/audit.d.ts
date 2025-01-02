@@ -8,6 +8,7 @@ export type AuditTable = {
   before: ColumnType<Record<string, any>, string, string> | null;
   after: ColumnType<Record<string, any>, string, string>;
   table_name: string;
+  entity_id: string;
 };
 
 export type Audit = Selectable<AuditTable>;

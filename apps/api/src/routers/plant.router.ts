@@ -123,6 +123,37 @@ export default router({
       await plantService.updateNextWateringDate(plant[0]);
       return await GetPlant(opts.input.id);
     }),
+  getLastWateredById: protectedProcedure
+    .input(z.string())
+    .query(async (opts) => {
+      return (
+        (
+          await db
+            .selectFrom('audit')
+            .select('user_id')
+            .where('table_name', '=', 'plant')
+            .where('entity_id', '=', opts.input)
+            .where('action', '=', 'WATER')
+            .orderBy('date desc')
+            .limit(1)
+            .executeTakeFirst()
+        )?.user_id ?? ''
+      );
+    }),
+  getAuditLog: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        type: z.string(),
+      }),
+    )
+    .query((opts) => {
+      return db
+        .selectFrom('audit')
+        .where('table_name', '=', 'plant')
+        .where('entity_id', '=', opts.input.id)
+        .execute();
+    }),
 });
 
 async function GetPlant(id: string) {

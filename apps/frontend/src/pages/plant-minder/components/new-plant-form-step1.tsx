@@ -1,13 +1,15 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
-import {useForm, UseFormReturn} from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { Button, TextInput } from '@mantine/core';
-import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
-import {Dispatch, SetStateAction, useCallback} from "react";
-import {Step} from "@/src/stores/slices/new-plant-slice.ts";
+import {
+  NewPlantFormInputs,
+  Step,
+} from '@/src/pages/plant-minder/components/new-plant-form.tsx';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 
 export function NewPlantFormStep1(props: {
-  form: UseFormReturn<NewPlantFormInputs>,
+  form: UseFormReturn<NewPlantFormInputs>;
   setTransitionTarget: Dispatch<SetStateAction<Step>>;
 }) {
   const { handleSubmit } = useForm();
@@ -20,7 +22,7 @@ export function NewPlantFormStep1(props: {
     const defaultClasses =
       'hover:bg-primary-800 transition-colors cursor-pointer';
     return !nameWatcher.length ? defaultClasses + ' disable' : defaultClasses;
-  }, [nameWatcher])
+  }, [nameWatcher]);
 
   return (
     <form

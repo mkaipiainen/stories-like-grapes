@@ -10,8 +10,10 @@ import { notifications } from '@mantine/notifications';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { faCamera, faCancel } from '@fortawesome/free-solid-svg-icons';
-import { NewPlantFormInputs } from '@/src/pages/plant-minder/components/new-plant-form.tsx';
-import { Step } from '@/src/stores/slices/new-plant-slice.ts';
+import {
+  NewPlantFormInputs,
+  Step,
+} from '@/src/pages/plant-minder/components/new-plant-form.tsx';
 import { ENTITY_TYPE } from '@api/src/constants/entity.constant.ts';
 import { UseFileUpload } from '@/src/hooks/use-file-upload.tsx';
 

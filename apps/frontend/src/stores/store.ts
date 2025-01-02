@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import newPlantReducer from './slices/new-plant-slice';
+import authReducer from './slices/auth.slice';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 export const store = configureStore({
   reducer: {
-    newPlantReducer,
+    authReducer,
   },
 });
 // Get the type of our store variable

@@ -1,10 +1,13 @@
-import {Step, STEPS} from '@/src/stores/slices/new-plant-slice.ts';
 import './new-plant-form-step-switcher.css';
-import React, {Dispatch, SetStateAction} from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import {
+  Step,
+  STEPS,
+} from '@/src/pages/plant-minder/components/new-plant-form.tsx';
 
 export function NewPlantFormStepSwitcher(props: {
-  step: number,
-  setTransitionTarget: Dispatch<SetStateAction<Step>>,
+  step: number;
+  setTransitionTarget: Dispatch<SetStateAction<Step>>;
 }) {
   function getStepClass(singleStep: number) {
     const defaultClasses =

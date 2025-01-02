@@ -4,12 +4,13 @@ import { NewPlantFormStep2 } from '@/src/pages/plant-minder/components/new-plant
 import { useDissolve } from '@/src/hooks/dissolve/use-dissolve.tsx';
 import { match } from 'ts-pattern';
 import { NewPlantFormStepSwitcher } from '@/src/pages/plant-minder/components/new-plant-form-step-switcher.tsx';
-import { Step } from '@/src/stores/slices/new-plant-slice.ts';
 import { NewPlantFormStep3 } from '@/src/pages/plant-minder/components/new-plant-form-step3.tsx';
 import { NewPlantFormStep4 } from './new-plant-form-step4';
-import {useForm} from "react-hook-form";
-import {FileWithPath} from "@mantine/dropzone";
+import { useForm } from 'react-hook-form';
+import { FileWithPath } from '@mantine/dropzone';
 
+export const STEPS: Step[] = [1, 2, 3, 4];
+export type Step = 1 | 2 | 3 | 4;
 export type NewPlantFormInputs = {
   name: string;
   description: string;
@@ -32,10 +33,9 @@ export function NewPlantForm() {
       name: '',
       tags: [],
       image: undefined,
-      wateringFrequency: '0'
-    }
+      wateringFrequency: '0',
+    },
   });
-
 
   const getForm = useCallback(() => {
     return match(transitionTarget)
@@ -43,10 +43,16 @@ export function NewPlantForm() {
         return (
           <div className={'h-full w-full flex items-center justify-center'}>
             <div className={'opacity-0 absolute z-0'} ref={step2}>
-              <NewPlantFormStep2 setTransitionTarget={setTransitionTarget} form={form} />
+              <NewPlantFormStep2
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
             </div>
             <div ref={step1} className={'z-10 step1'}>
-              <NewPlantFormStep1 setTransitionTarget={setTransitionTarget} form={form} />
+              <NewPlantFormStep1
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
             </div>
           </div>
         );
@@ -55,38 +61,56 @@ export function NewPlantForm() {
         return (
           <div className={'h-full w-full flex items-center justify-center'}>
             <div className={'opacity-0 absolute z-0'} ref={step1}>
-              <NewPlantFormStep1 setTransitionTarget={setTransitionTarget} form={form} />
+              <NewPlantFormStep1
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
             </div>
             <div ref={step2} className={'z-10 step2'}>
-              <NewPlantFormStep2 setTransitionTarget={setTransitionTarget} form={form} />
+              <NewPlantFormStep2
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
             </div>
           </div>
         );
       })
       .with(3, () => {
-            return (
-                <div className={'h-full w-full flex items-center justify-center'}>
-                    <div className={'opacity-0 absolute z-0'} ref={step2}>
-                        <NewPlantFormStep2 setTransitionTarget={setTransitionTarget} form={form} />
-                    </div>
-                    <div ref={step3} className={'z-10 step3'}>
-                        <NewPlantFormStep3 setTransitionTarget={setTransitionTarget} form={form} />
-                    </div>
-                </div>
-            );
-        })
-        .with(4, () => {
-            return (
-                <div className={'h-full w-full flex items-center justify-center'}>
-                    <div className={'opacity-0 absolute z-0'} ref={step2}>
-                        <NewPlantFormStep3 setTransitionTarget={setTransitionTarget} form={form} />
-                    </div>
-                    <div ref={step4} className={'z-10 step3'}>
-                        <NewPlantFormStep4 setTransitionTarget={setTransitionTarget} form={form} />
-                    </div>
-                </div>
-            );
-        })
+        return (
+          <div className={'h-full w-full flex items-center justify-center'}>
+            <div className={'opacity-0 absolute z-0'} ref={step2}>
+              <NewPlantFormStep2
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
+            </div>
+            <div ref={step3} className={'z-10 step3'}>
+              <NewPlantFormStep3
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
+            </div>
+          </div>
+        );
+      })
+      .with(4, () => {
+        return (
+          <div className={'h-full w-full flex items-center justify-center'}>
+            <div className={'opacity-0 absolute z-0'} ref={step2}>
+              <NewPlantFormStep3
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
+            </div>
+            <div ref={step4} className={'z-10 step3'}>
+              <NewPlantFormStep4
+                setTransitionTarget={setTransitionTarget}
+                form={form}
+              />
+            </div>
+          </div>
+        );
+      })
       .exhaustive();
   }, [transitionTarget]);
 
@@ -147,7 +171,10 @@ export function NewPlantForm() {
 
   return (
     <div className={'flex flex-col h-full w-full'}>
-      <NewPlantFormStepSwitcher step={transitionTarget} setTransitionTarget={setTransitionTarget}></NewPlantFormStepSwitcher>
+      <NewPlantFormStepSwitcher
+        step={transitionTarget}
+        setTransitionTarget={setTransitionTarget}
+      ></NewPlantFormStepSwitcher>
       <div className={'flex-grow flex w-full items-center justify-center'}>
         {getForm()}
       </div>

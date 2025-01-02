@@ -1,6 +1,6 @@
 import { useQuill } from 'react-quilljs';
-import {useForm, UseFormReturn} from 'react-hook-form';
-import {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import {
@@ -13,15 +13,17 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
-import {Step} from "@/src/stores/slices/new-plant-slice.ts";
-import {TAG_OPTIONS, TAGS} from "@/src/constants/tags.ts";
+import {
+  NewPlantFormInputs,
+  Step,
+} from '@/src/pages/plant-minder/components/new-plant-form.tsx';
+import { TAG_OPTIONS, TAGS } from '@/src/constants/tags.ts';
 type Inputs = {
   description: string;
 };
 
 export function NewPlantFormStep3(props: {
-  form: UseFormReturn<NewPlantFormInputs>,
+  form: UseFormReturn<NewPlantFormInputs>;
   setTransitionTarget: Dispatch<SetStateAction<Step>>;
 }) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -48,7 +50,7 @@ export function NewPlantFormStep3(props: {
   }
 
   function acceptTags(selectedTags: string[]) {
-    props.form.setValue('tags', [...selectedTags])
+    props.form.setValue('tags', [...selectedTags]);
     setTemporaryTags([]);
     close();
   }

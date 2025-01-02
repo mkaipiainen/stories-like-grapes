@@ -1,15 +1,16 @@
-import {useForm, UseFormReturn} from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import { isNil } from 'rambda';
 import { Button, NumberInput } from '@mantine/core';
-import {NewPlantFormInputs} from "@/src/pages/plant-minder/components/new-plant-form.tsx";
-import {Dispatch, SetStateAction, useCallback} from "react";
-import {Step} from "@/src/stores/slices/new-plant-slice.ts";
-
+import {
+  NewPlantFormInputs,
+  Step,
+} from '@/src/pages/plant-minder/components/new-plant-form.tsx';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 
 export function NewPlantFormStep2(props: {
-  form: UseFormReturn<NewPlantFormInputs>,
+  form: UseFormReturn<NewPlantFormInputs>;
   setTransitionTarget: Dispatch<SetStateAction<Step>>;
 }) {
   const { handleSubmit } = useForm();
@@ -22,8 +23,10 @@ export function NewPlantFormStep2(props: {
   const getContinueButtonClass = useCallback(() => {
     const defaultClasses =
       'hover:bg-primary-800 transition-colors cursor-pointer';
-    return isNil(wateringFrequencyWatcher) ? defaultClasses + ' disable' : defaultClasses;
-  }, [wateringFrequencyWatcher])
+    return isNil(wateringFrequencyWatcher)
+      ? defaultClasses + ' disable'
+      : defaultClasses;
+  }, [wateringFrequencyWatcher]);
 
   function onWateringFrequencyChange(value: string | number) {
     props.form.setValue('wateringFrequency', value.toString());
