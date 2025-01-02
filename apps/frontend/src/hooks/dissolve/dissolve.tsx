@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {ColorMatrix} from "@/src/hooks/dissolve/use-dissolve.tsx";
+import { ColorMatrix } from '@/src/hooks/dissolve/use-dissolve.tsx';
 
 export type DissolveProps = {
   width: number;
@@ -66,7 +66,6 @@ export function Dissolve(props: DissolveProps) {
     const a = interpolate(defaultMatrix.a, targetMatrix.a);
 
     // Combine into a string
-    console.log(r, g, b, a);
     return [...r, ...g, ...b, ...a].join(' ');
   }
 

@@ -63,8 +63,6 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
         p256dh: arrayBufferToBase64(p256dh), // Convert to Base64
         endpoint: subscription.endpoint,
       });
-
-      console.log('Push subscription:', subscription);
     }
   }
 

@@ -47,7 +47,6 @@ export const Auth0ProviderWithNavigate: FC<{ children: any }> = ({
   const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
   const redirectUri = window.location.origin;
 
-  console.log(domain, clientId, redirectUri);
   const onRedirectCallback = (appState: any) => {
     navigate(appState?.returnTo || window.location.pathname);
   };

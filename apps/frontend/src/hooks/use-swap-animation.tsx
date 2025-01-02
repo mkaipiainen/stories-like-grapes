@@ -21,7 +21,6 @@ const useSwapAnimation = ({
     return new Promise<void>((resolve, reject) => {
       const element1 = element1Ref.current;
       const element2 = element2Ref.current;
-      console.log(element1, element2);
       if (!element1 || !element2) {
         reject();
         throw new Error('No references set, therefore could not animate');
