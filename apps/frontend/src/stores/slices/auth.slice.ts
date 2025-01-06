@@ -10,7 +10,7 @@ const initialState = {
 } satisfies AuthState as AuthState;
 
 export const AuthSlice = createSlice({
-  name: 'newPlantSlice',
+  name: 'authSlice',
   initialState: initialState,
   reducers: {
     setUsers: (state, action: PayloadAction<User[]>) => {

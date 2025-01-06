@@ -9,7 +9,7 @@ import {
 } from '@mantine/core';
 import { S3Image } from '@/src/components/s3-image.tsx';
 import { PlantWithTagsAndImages } from '@api/src/db/types/plant';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDroplet } from '@fortawesome/free-solid-svg-icons';
 import { trpc } from '@/src/util/trpc.ts';
@@ -29,6 +29,9 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
   const trpcContext = trpc.useUtils();
   const mood = UsePlantMood(props.plant);
   const image = UsePlantPlaceholderImage(props.plant);
+  const mainImage = useMemo(() => {
+    return props.plant.images.find((image) => image.is_main_image);
+  }, [props.plant.images]);
 
   const doWaterMutation = trpc.plant.water.useMutation({
     onSettled: () => {
@@ -74,7 +77,7 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
   }
 
   function getCardClass() {
-    return `flex items-center justify-center relative w-80 h-80 m-4 ${mood.mood}`;
+    return `flex items-center justify-center relative w-72 h-72 max-w-72 min-h-72 max-h-72 m-4 ${mood.mood}`;
   }
 
   return (
@@ -108,7 +111,7 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
       </ActionIcon>
       <Card
         className={
-          'w-80 h-80 m-4 border-none box-border items-center hover:bg-primary-900 transition'
+          'h-72 min-h-72 max-h-72 m-4 p-2 border-none box-border items-center hover:bg-primary-900 transition'
         }
         shadow="sm"
         padding="lg"
@@ -118,13 +121,13 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
           filter: `url(#${filterId}) drop-shadow(2px 5px 1px rgba(0, 0, 0, 0.2))`,
         }}
       >
-        <Card.Section className={'flex-grow basis-1/2 h-1/2 max-h-1/2 w-full'}>
-          {props.plant.images.length ? (
+        <Card.Section className={'flex-grow basis-1/2 w-full m-0'}>
+          {mainImage ? (
             <S3Image
               style={{
                 viewTransitionName: isTransitioning ? 'plant-image' : 'none',
               }}
-              id={props.plant.images[0]?.id}
+              id={mainImage.id}
             ></S3Image>
           ) : (
             <Image
@@ -139,9 +142,13 @@ export function PlantCard(props: { plant: PlantWithTagsAndImages }) {
           )}
         </Card.Section>
         <Card.Section
-          className={'flex-grow flex flex-col basis-1/2 h-1/2 max-h-1/2 w-full'}
+          className={'flex-grow flex flex-col basis-1/2 w-full m-0'}
         >
-          <Group justify="space-between" className={'flex-1'} mt="md" mb="xs">
+          <Group
+            justify="space-between"
+            className={'flex-1 h-12 min-h-12'}
+            mt="xs"
+          >
             <Title size={'h5'} fw={500}>
               {props.plant.name}
             </Title>

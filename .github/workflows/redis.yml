@@ -1,0 +1,40 @@
+name: Build and Push Docker Image
+
+permissions:
+  contents: 'read'
+  packages: 'write'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/redis.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+
+      - name: Get and store Droplet IP
+        run: echo "DROPLET_IP=$(doctl compute droplet list --format PublicIPv4 --no-header www-1)" >> $GITHUB_ENV
+
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{env.DROPLET_IP}} >> ~/.ssh/known_hosts
+
+      - name: Deploy to DigitalOcean Droplet
+        run: |
+          doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
+          docker run -d --name slg-redis \
+          --network app-default \
+          redis
+          EOF

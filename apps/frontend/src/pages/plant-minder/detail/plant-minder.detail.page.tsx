@@ -1,6 +1,7 @@
 import { trpc } from '@/src/util/trpc.ts';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  ActionIcon,
   Button,
   Group,
   Image,
@@ -32,6 +33,8 @@ import { ImageManager } from '@/src/pages/plant-minder/detail/components/image-m
 import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-image.tsx';
 import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
 import { useAppSelector } from '@/src/stores/store.ts';
+import { faArrowLeft, faDroplet } from '@fortawesome/free-solid-svg-icons';
+import background from '@/src/assets/images/plant-background.webp';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -128,6 +131,7 @@ export function PlantMinderDetailPage() {
         title: 'Plant watered!',
         message: 'Plant was watered succesfully',
       });
+      utils.plant.get.invalidate();
     },
     onError: () => {
       notifications.show({
@@ -244,7 +248,7 @@ export function PlantMinderDetailPage() {
   }, [mood]);
 
   return (
-    <>
+    <div className={'w-full h-full flex items-center justify-center relative'}>
       {isLoading ? (
         <LoadingOverlay
           visible={true}
@@ -253,168 +257,192 @@ export function PlantMinderDetailPage() {
           pos={'absolute'}
         ></LoadingOverlay>
       ) : (
-        <div
-          className={'flex h-full w-full flex-col relative max-w-5xl'}
-          ref={container}
+        <></>
+      )}
+      <div
+        className={'flex h-full w-full flex-col relative max-w-5xl'}
+        ref={container}
+      >
+        <Link
+          className={'w-1/3'}
+          to={`/plant-minder/list`}
+          viewTransition={true}
         >
-          <div className="absolute inset-0 -z-10"></div>
-          <Paper
-            style={{
-              filter:
-                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-              viewTransitionName: 'bg',
-            }}
+          <ActionIcon
+            color={'white'}
+            className={'shadow-action shadow-primary-foreground'}
+            variant="filled"
+            size="xl"
+            radius="xl"
+            aria-label="Delete"
+          >
+            <FontAwesomeIcon
+              size={'lg'}
+              color={'black'}
+              icon={faArrowLeft}
+            ></FontAwesomeIcon>
+          </ActionIcon>
+        </Link>
+        <Paper
+          style={{
+            filter:
+              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+            viewTransitionName: 'bg',
+          }}
+          className={
+            'relative flex w-full items-center flex-col box-border p-4 mb-4'
+          }
+        >
+          <div
             className={
-              'relative flex w-full items-center flex-col box-border p-4 mb-4'
+              'flex absolute top-0 right-0 items-center p-4 box-border'
             }
           >
+            {updateMutation.isPending ? (
+              <div className={'flex items-center'}>
+                <Loader size={'sm'}></Loader>
+              </div>
+            ) : (
+              <div className={'flex items-center'}>
+                <FontAwesomeIcon
+                  className={'mr-4'}
+                  icon={faCheck}
+                  color={'green'}
+                ></FontAwesomeIcon>
+                <Text size={'sm'} c={'green'}>
+                  Updated
+                </Text>
+              </div>
+            )}
+          </div>
+          <Group className={'w-full'}>
+            <Image
+              src={placeholderImage}
+              height={80}
+              alt="Plant image placeholder"
+              className={'object-contain h-32 w-32'}
+            />
+            <Group
+              className={'flex flex-grow flex-col items-start justify-center'}
+            >
+              <Text>{getWateringText()}</Text>
+              <Text size={'xs'}>
+                Last watered by <b>{lastWateredBy}</b> on{' '}
+                {data?.last_watered?.toLocaleDateString()}
+              </Text>
+            </Group>
+            <Group className={'flex flex-shrink flex-col'}>
+              <ActionIcon
+                color={'green'}
+                onClick={() => onDoWater()}
+                className={'shadow-action shadow-primary-foreground'}
+                variant="filled"
+                size="xl"
+                radius="xl"
+                aria-label="Delete"
+              >
+                <FontAwesomeIcon
+                  size={'lg'}
+                  color={'white'}
+                  icon={faDroplet}
+                ></FontAwesomeIcon>
+              </ActionIcon>
+            </Group>
+          </Group>
+        </Paper>
+        <div className={'horizontal-divider bg-primary-800'}></div>
+        <Paper
+          className={'flex w-full flex-col p-4'}
+          style={{
+            filter:
+              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+          }}
+        >
+          <MultiSelect
+            placeholder="Add a tag..."
+            onChange={(data: string[]) => {
+              setEditableFields({
+                ...editableFields,
+                tags: data,
+              });
+            }}
+            value={editableFields.tags}
+            data={TAG_OPTIONS}
+            renderOption={renderMultiSelectOption}
+          />
+          <div className={'horizontal-divider bg-primary-800 my-4'}></div>
+          <div className="min-h-40 w-full" ref={quillRef} />
+        </Paper>
+        <div className={'horizontal-divider bg-primary-800'}></div>
+        <Paper
+          style={{
+            filter:
+              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+          }}
+          className={'flex w-full items-center flex-col box-border p-4'}
+        >
+          <div className={'flex flex-col items-center md:flex-row w-full'}>
+            <ImageManager plant={data}></ImageManager>
             <div
               className={
-                'flex absolute top-0 right-0 items-center p-4 box-border'
+                'horizontal-divider md:vertical-divider bg-primary-400'
               }
-            >
-              {updateMutation.isPending ? (
-                <div className={'flex items-center'}>
-                  <Loader size={'sm'}></Loader>
-                </div>
-              ) : (
-                <div className={'flex items-center'}>
-                  <FontAwesomeIcon
-                    className={'mr-4'}
-                    icon={faCheck}
-                    color={'green'}
-                  ></FontAwesomeIcon>
-                  <Text size={'sm'} c={'green'}>
-                    Updated
-                  </Text>
-                </div>
-              )}
-            </div>
-            <Group className={'w-full'}>
-              <Group>
-                <Image
-                  src={placeholderImage}
-                  height={80}
-                  alt="Plant image placeholder"
-                  className={'object-contain h-32 w-32'}
-                />
-                <Group className={'flex flex-col items-start justify-center'}>
-                  <Text>{getWateringText()}</Text>
-                  <Text size={'xs'}>
-                    Last watered by <b>{lastWateredBy}</b> on{' '}
-                    {data?.last_watered?.toLocaleDateString()}
-                  </Text>
-                </Group>
-                <Group className={'flex flex-col'}>
-                  <Button
-                    className={'mr-2'}
-                    color={'green'}
-                    onClick={() => onDoWater()}
-                  >
-                    Water
-                  </Button>
-                </Group>
-              </Group>
-            </Group>
-          </Paper>
-          <Paper
-            style={{
-              filter:
-                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-              viewTransitionName: 'bg',
-            }}
-            className={'flex w-full items-center flex-col box-border p-4'}
-          >
-            <div className={'flex flex-col items-center md:flex-row w-full'}>
-              {!data ? (
-                <LoadingOverlay />
-              ) : (
-                <ImageManager plant={data}></ImageManager>
-              )}
-              <div
-                className={
-                  'horizontal-divider md:vertical-divider bg-primary-400'
+            ></div>
+            <div className={'flex flex-col basis-1/2 w-full'}>
+              <TextInput
+                autoComplete="off"
+                className={'p-4 w-full'}
+                onChange={(value) =>
+                  setEditableFields({
+                    ...editableFields,
+                    name: value.target.value,
+                  })
                 }
-              ></div>
-              <div className={'flex flex-col basis-1/2 w-full'}>
-                <TextInput
-                  autoComplete="off"
-                  className={'p-4 w-full'}
-                  onChange={(value) =>
+                value={editableFields.name}
+                label={'Name'}
+                required={true}
+              ></TextInput>
+              <div className="flex items-center p-4">
+                <span className="text-nowrap mr-4 flex items-center">
+                  Water every{' '}
+                </span>
+                <NumberInput
+                  className={'mr-4 flex items-center'}
+                  value={editableFields.watering_frequency}
+                  min={0}
+                  max={undefined}
+                  onChange={(value) => {
                     setEditableFields({
                       ...editableFields,
-                      name: value.target.value,
-                    })
-                  }
-                  value={editableFields.name}
-                  label={'Name'}
+                      watering_frequency: AsNumber(value),
+                    });
+                  }}
                   required={true}
-                ></TextInput>
-                <div className="flex items-center p-4">
-                  <span className="text-nowrap mr-4 flex items-center">
-                    Water every{' '}
-                  </span>
-                  <NumberInput
-                    className={'mr-4 flex items-center'}
-                    value={editableFields.watering_frequency}
-                    min={0}
-                    max={undefined}
-                    onChange={(value) => {
-                      setEditableFields({
-                        ...editableFields,
-                        watering_frequency: AsNumber(value),
-                      });
-                    }}
-                    required={true}
-                  ></NumberInput>
-                  <span className={'flex items-center'}>days</span>
-                </div>
+                ></NumberInput>
+                <span className={'flex items-center'}>days</span>
               </div>
             </div>
-          </Paper>
-          <div className={'horizontal-divider bg-primary-800'}></div>
-          <Paper
-            className={'flex w-full flex-col p-4'}
-            style={{
-              filter:
-                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-            }}
-          >
-            <MultiSelect
-              placeholder="Add a tag..."
-              onChange={(data: string[]) => {
-                setEditableFields({
-                  ...editableFields,
-                  tags: data,
-                });
-              }}
-              value={editableFields.tags}
-              data={TAG_OPTIONS}
-              renderOption={renderMultiSelectOption}
-            />
-            <div className={'horizontal-divider bg-primary-800 my-4'}></div>
-            <div className="min-h-40 w-full" ref={quillRef} />
-          </Paper>
-          <div className={'horizontal-divider bg-primary-800'}></div>
-          <Paper
-            className={'flex w-full flex-col p-4'}
-            style={{
-              filter:
-                'url(#bg-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-            }}
-          >
-            <Group justify={'flex-end'}>
-              <Button
-                color={'red'}
-                onClick={() => deleteMutation.mutate(data!.id)}
-              >
-                Delete
-              </Button>
-            </Group>
-          </Paper>
-          <PaperDistort filterId={'bg-filter'}></PaperDistort>
-        </div>
-      )}
-    </>
+          </div>
+        </Paper>
+        <div className={'horizontal-divider bg-primary-800'}></div>
+        <Paper
+          className={'flex w-full flex-col p-4'}
+          style={{
+            filter:
+              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+          }}
+        >
+          <Group justify={'flex-end'}>
+            <Button
+              color={'red'}
+              onClick={() => deleteMutation.mutate(data!.id)}
+            >
+              Delete
+            </Button>
+          </Group>
+        </Paper>
+        <PaperDistort filterId={'paper-filter'}></PaperDistort>
+      </div>
+    </div>
   );
 }

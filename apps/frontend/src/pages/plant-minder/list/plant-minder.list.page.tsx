@@ -1,17 +1,17 @@
 import { trpc } from '@/src/util/trpc.ts';
-import { Button, LoadingOverlay } from '@mantine/core';
+import { Button, Image, LoadingOverlay } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { PlantCard } from '@/src/pages/plant-minder/list/components/plant-card.tsx';
 import { UseHasRoles } from '@/src/hooks/use-has-roles.ts';
 import { GUID } from '@/src/util/guid.ts';
 import { ENTITY_TYPE } from '@api/src/constants/entity.constant.ts';
 import { useState } from 'react';
+import background from '@/src/assets/images/plant-background.webp';
 
 export function PlantMinderListPage() {
   const trpcContext = trpc.useUtils();
   const isAdmin = UseHasRoles(['Admin']);
   const { isLoading, data } = trpc.plant.list.useQuery();
-  const testPushMutation = trpc.sub.test.useMutation();
   const [activePlantId, setActivePlantId] = useState<string | null>(null);
   const createPlantMutation = trpc.plant.create.useMutation({
     onSettled: async () => {
@@ -39,7 +39,7 @@ export function PlantMinderListPage() {
     }
   }
   return (
-    <>
+    <div className={'w-full h-full relative flex items-center justify-center'}>
       {isLoading ? (
         <LoadingOverlay
           visible={true}
@@ -54,6 +54,7 @@ export function PlantMinderListPage() {
         <div className={'flex items-center flex-wrap flex-grow'}>
           {data?.map((plant) => (
             <Link
+              className={'w-1/3'}
               key={plant.id}
               to={`/plant-minder/detail/${plant.id}`}
               viewTransition={true}
@@ -90,9 +91,8 @@ export function PlantMinderListPage() {
           ) : (
             <></>
           )}
-          <Button onClick={() => testPushMutation.mutate()}>Mutate</Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

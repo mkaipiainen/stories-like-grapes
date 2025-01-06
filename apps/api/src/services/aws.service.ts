@@ -31,7 +31,7 @@ export function AwsService() {
               method: type,
             }),
             {
-              expiresIn: 5, // Adjust expiration time as needed
+              expiresIn: 120, // Adjust expiration time as needed
             },
           ),
         );

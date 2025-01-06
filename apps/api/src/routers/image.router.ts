@@ -4,16 +4,23 @@ import { TRPCError } from '@trpc/server';
 import { db } from '../db/db';
 import { ZodEntityType } from '../constants/entity.constant';
 import { awsService } from '../services/aws.service';
-import { GUID } from '../util/guid';
 import { imageService, ZCreateImageData } from '../services/image.service';
 import { protectedProcedure } from '../procedures/protected.procedure';
 import { isNil } from 'rambda';
+import { redis } from '../redis';
 
 export const imageRouter = router({
   getS3Url: protectedProcedure
     .input(z.string())
     .query(async ({ input: id }) => {
+      const cachedImageUrl = await redis.get(`s3-image-${id}`);
+      if (cachedImageUrl) {
+        console.log('Returning from cache', cachedImageUrl);
+        return cachedImageUrl;
+      }
+      console.log('No cached image found');
       const presignedUrl = await awsService.generateS3Url(id, 'GET');
+      redis.set(`s3-image-${id}`, presignedUrl, 'EX', 120);
       return presignedUrl;
     }),
   getById: protectedProcedure.input(z.string()).query(async ({ input: id }) => {

@@ -5,6 +5,7 @@ import {
   Button,
   Group,
   Loader,
+  LoadingOverlay,
   Modal,
   Text,
 } from '@mantine/core';
@@ -22,16 +23,21 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 import { notifications } from '@mantine/notifications';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
-export function ImageManager(props: { plant: Plant }) {
+export function ImageManager(props: { plant: Plant | undefined }) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const { doUpload, isUploadLoading } = UseFileUpload();
   const utils = trpc.useUtils();
   const [selectedSlide, setSelectedSlide] = useState(0);
-  const getImagesQuery = trpc.image.getByEntity.useQuery({
-    entityType: ENTITY_TYPE.PLANT,
-    entityId: props.plant.id,
-  });
+  const getImagesQuery = trpc.image.getByEntity.useQuery(
+    {
+      entityType: ENTITY_TYPE.PLANT,
+      entityId: props?.plant?.id ?? '',
+    },
+    {
+      enabled: !!props.plant,
+    },
+  );
   const updateMutation = trpc.image.update.useMutation({
     onSuccess: () => {
       utils.plant.get.invalidate();
@@ -72,6 +78,9 @@ export function ImageManager(props: { plant: Plant }) {
   });
 
   function doUploadImage(files: FileWithPath[]) {
+    if (!props.plant) {
+      throw new Error('Plant not initialised, could not upload image');
+    }
     doUpload(files[0], {
       id: props.plant.id,
       type: ENTITY_TYPE.PLANT,
@@ -83,6 +92,7 @@ export function ImageManager(props: { plant: Plant }) {
 
   return (
     <>
+      {!props.plant ? <LoadingOverlay /> : <></>}
       <Group className={'basis-1/2 h-40 max-h-40'} wrap={'nowrap'}>
         {/*<Image*/}
         {/*  style={{ viewTransitionName: 'plant-image' }}*/}
@@ -91,38 +101,43 @@ export function ImageManager(props: { plant: Plant }) {
         {/*  alt="Plant image placeholder"*/}
         {/*  className={'object-contain w-40 h-40'}*/}
         {/*/>*/}
-        {images.mainImage ? (
-          <S3Image
-            id={images.mainImage.id}
-            onClick={() => {
-              const index = images.allImages.findIndex((image) => {
-                return image.id === images.mainImage?.id;
-              });
-              setSelectedSlide(index);
-              open();
-            }}
-            className={
-              'object-cover cursor-pointer hover:shadow-md hover:outline-1 transition w-40 h-40'
-            }
-          />
-        ) : (
-          <Dropzone className={'rounded-full'} onDrop={doUploadImage}>
-            <Dropzone.Idle>
-              <ActionIcon
-                color="rgba(0, 0, 0, 0.4)"
-                variant="subtle"
-                radius={'xl'}
-                size={'xl'}
-                aria-label="Add an image"
-                className={'relative h-16 w-16 rounded-full'}
-              >
-                <>
-                  <AddAPhotoOutlinedIcon fontSize={'large'} />
-                </>
-              </ActionIcon>
-            </Dropzone.Idle>
-          </Dropzone>
-        )}
+        <div
+          className={'relative'}
+          style={{ viewTransitionName: 'plant-image' }}
+        >
+          {images.mainImage ? (
+            <S3Image
+              id={images.mainImage.id}
+              onClick={() => {
+                const index = images.allImages.findIndex((image) => {
+                  return image.id === images.mainImage?.id;
+                });
+                setSelectedSlide(index);
+                open();
+              }}
+              className={
+                'object-cover cursor-pointer hover:shadow-md hover:outline-1 transition w-40 h-40'
+              }
+            />
+          ) : (
+            <Dropzone className={'rounded-full'} onDrop={doUploadImage}>
+              <Dropzone.Idle>
+                <ActionIcon
+                  color="rgba(0, 0, 0, 0.4)"
+                  variant="subtle"
+                  radius={'xl'}
+                  size={'xl'}
+                  aria-label="Add an image"
+                  className={'relative h-16 w-16 rounded-full'}
+                >
+                  <>
+                    <AddAPhotoOutlinedIcon fontSize={'large'} />
+                  </>
+                </ActionIcon>
+              </Dropzone.Idle>
+            </Dropzone>
+          )}
+        </div>
 
         <Group className={'h-full'} wrap={'wrap'} align={'flex-start'}>
           {images.secondaryImages.map((image) => {
