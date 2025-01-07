@@ -4,7 +4,11 @@ import background from '@/src/assets/images/plant-background.webp';
 
 export function PlantMinderPage() {
   return (
-    <div className={'flex flex-col h-full w-full max-w-5xl overflow-y-scroll'}>
+    <div
+      className={
+        'flex flex-col h-full w-full max-w-5xl relative overflow-y-scroll'
+      }
+    >
       <Image
         src={background}
         style={{ filter: 'url(#bg-filter)' }}

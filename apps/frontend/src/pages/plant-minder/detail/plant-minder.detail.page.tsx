@@ -264,7 +264,7 @@ export function PlantMinderDetailPage() {
         ref={container}
       >
         <Link
-          className={'w-1/3'}
+          className={'absolute top-1 left-1 z-10'}
           to={`/plant-minder/list`}
           viewTransition={true}
         >

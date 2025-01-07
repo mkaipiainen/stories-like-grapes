@@ -1,10 +1,15 @@
 import { trpc } from '@/src/util/trpc.ts';
-import { FC, useEffect } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import { useAppDispatch } from '@/src/stores/store.ts';
 import { setUsers } from '@/src/stores/slices/auth.slice.ts';
+import { MainMenu } from '@/src/components/main-menu/main-menu.tsx';
+import { Link, useLocation } from 'react-router-dom';
+import { Image } from '@mantine/core';
+import logo from '@/src/assets/images/logo.webp';
 
 export const AppWrapper: FC<{ children: any }> = ({ children }) => {
   const subscriptionMutator = trpc.sub.subscribe.useMutation();
+  const location = useLocation();
   const users = trpc.auth.list.useQuery();
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -66,5 +71,58 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
     }
   }
 
-  return <>{children}</>;
+  const getImageStyle = useCallback(() => {
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const elementHeight = Math.min(Math.max(viewportHeight * 0.25, 300), 500);
+    const elementWidth = Math.min(Math.max(viewportWidth * 0.25, 300), 500);
+    const elementHeightOffset = elementHeight * 0.5;
+    if (location.pathname === '/') {
+      // Middle of the viewport
+      return {
+        transform: `translate(-50%, ${viewportHeight / 2 - elementHeightOffset}px) scale(1)`,
+        position: 'fixed',
+        transition: 'transform 0.3s, opacity 0.3s',
+        left: '50%',
+        pointerEvents: 'none',
+        transformOrigin: 'top',
+        width: `${elementWidth}px`,
+        height: `${elementHeight}px`,
+        zIndex: 999,
+        filter: 'drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.2))',
+      } as any;
+    } else {
+      // Top of the viewport
+      return {
+        transform: `translate(-50%, 0) scale(0.35)`,
+        position: 'fixed',
+        transition: 'transform 0.3s, opacity 0.3',
+        left: '50%',
+        transformOrigin: 'top',
+        width: `${elementWidth}px`,
+        height: `${elementHeight}px`,
+        zIndex: 999,
+        opacity: 0.8,
+        filter: 'drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
+      } as any;
+    }
+  }, [location]);
+  return (
+    <div
+      className={
+        'flex flex-col overflow-y-auto w-full h-full relative items-center'
+      }
+    >
+      <div
+        style={getImageStyle()}
+        className={'flex items-center justify-center'}
+      >
+        <Link to={'/'} className={'h-full w-full'}>
+          <Image src={logo} className={'h-full w-full'}></Image>
+        </Link>
+      </div>
+      {children}
+      <MainMenu></MainMenu>
+    </div>
+  );
 };

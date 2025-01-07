@@ -14,6 +14,7 @@ import { PlantMinderRedirect } from '@/src/pages/plant-minder/plant-minder-redir
 import { PlantMinderDetailPage } from '@/src/pages/plant-minder/detail/plant-minder.detail.page.tsx';
 import { LandingPage } from '@/src/pages/landing/landing.page.tsx';
 import { AppWrapper } from '@/src/app-wrapper.tsx';
+import { CalendarPage } from '@/src/pages/calendar/calendar.page.tsx';
 
 interface AuthenticationGuardProps {
   component: ComponentType; // Ensures `component` is a valid React component
@@ -82,6 +83,12 @@ export const routes = createBrowserRouter([
       {
         path: '',
         element: <AuthenticationGuard component={LandingPage} />,
+      },
+      {
+        path: 'calendar',
+        element: (
+          <AuthenticationGuard component={CalendarPage}></AuthenticationGuard>
+        ),
       },
       {
         path: 'plant-minder',
