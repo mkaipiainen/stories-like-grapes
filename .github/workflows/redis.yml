@@ -32,8 +32,8 @@ jobs:
 
       - name: Deploy to DigitalOcean Droplet
         run: |
-          docker rm -f slg-redis
           doctl compute ssh www-1 --ssh-key-path ~/.ssh/id_rsa --ssh-user root -- << EOF
+          docker rm -f slg-redis
           docker network inspect app-default >/dev/null 2>&1 || docker network create --driver bridge app-default
           docker run -d --name slg-redis \
           --network app-default \
