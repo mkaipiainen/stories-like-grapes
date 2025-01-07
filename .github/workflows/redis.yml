@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Deploy redis
 
 permissions:
   contents: 'read'
@@ -12,7 +12,7 @@ on:
       - .github/workflows/redis.yml
 
 jobs:
-  deploy:
+  deploy-redis:
     runs-on: ubuntu-latest
     steps:
       - name: Install doctl
