@@ -6,7 +6,7 @@ import { MainMenu } from '@/src/components/main-menu/main-menu.tsx';
 import { Link, useLocation } from 'react-router-dom';
 import { Image } from '@mantine/core';
 import logo from '@/src/assets/images/logo.webp';
-
+import bgImage from '@/src/assets/images/background.webp';
 export const AppWrapper: FC<{ children: any }> = ({ children }) => {
   const subscriptionMutator = trpc.sub.subscribe.useMutation();
   const location = useLocation();
@@ -108,21 +108,28 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
     }
   }, [location]);
   return (
-    <div
-      className={
-        'flex flex-col overflow-y-auto w-full h-full relative items-center'
-      }
-    >
+    <div className={'flex flex-col w-full h-full relative items-center'}>
+      <Image
+        src={bgImage}
+        className={
+          'fixed pointer-events-none opacity-70 w-full h-full top-0 left-0 object-cover'
+        }
+      ></Image>
+      <div className={'h-48'}></div>
       <div
         style={getImageStyle()}
-        className={'flex items-center justify-center'}
+        className={'flex items-center flex-initial justify-center'}
       >
         <Link to={'/'} className={'h-full w-full'}>
-          <Image src={logo} className={'h-full w-full'}></Image>
+          <Image src={logo} className={'h-full w-full object-contain'}></Image>
         </Link>
       </div>
-      {children}
-      <MainMenu></MainMenu>
+      <div className={'flex-grow  slg-scrollbar overflow-y-auto '}>
+        {children}
+      </div>
+      <div className={'h-48 relative flex-initial'}>
+        <MainMenu></MainMenu>
+      </div>
     </div>
   );
 };

@@ -17,7 +17,7 @@ export function MainMenu() {
     },
   ];
   return (
-    <div className={'flex-initial h-24 flex items-center'}>
+    <div className={'flex-initial h-full w-full flex items-center'}>
       {routes.map((route) => {
         return (
           <MainMenuRoute route={route.route} icon={route.icon}></MainMenuRoute>

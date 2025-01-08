@@ -1,26 +1,26 @@
 import { Plant } from '@api/src/db/types/plant';
 import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
 import { match } from 'ts-pattern';
-import plantPlaceholder from '@/src/assets/images/plant-placeholder.webp';
-import worriedPlantPlaceholder from '@/src/assets/images/plant-placeholder-worried.webp';
-import angryPlantPlaceholder from '@/src/assets/images/plant-placeholder-angry.webp';
+import healthyPlant from '@/src/assets/images/healthy-plant.webp';
+import dryPlant from '@/src/assets/images/dry-plant.webp';
+import deadPlant from '@/src/assets/images/dead-plant.webp';
 import { useEffect, useState } from 'react';
 
 export function UsePlantPlaceholderImage(plant: Plant | undefined) {
   const mood = UsePlantMood(plant);
-  const [image, setImage] = useState(plantPlaceholder);
+  const [image, setImage] = useState(healthyPlant);
 
   useEffect(() => {
     setImage(
       match(mood.mood)
         .with('normal', () => {
-          return plantPlaceholder;
+          return healthyPlant;
         })
         .with('worried', () => {
-          return worriedPlantPlaceholder;
+          return dryPlant;
         })
         .with('angry', () => {
-          return angryPlantPlaceholder;
+          return deadPlant;
         })
         .exhaustive(),
     );

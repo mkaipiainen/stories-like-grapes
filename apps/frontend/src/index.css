@@ -152,3 +152,35 @@ body {
     flex: 1;
   }
 }
+
+.slg-scrollbar {
+  /* For modern browsers */
+  ::-webkit-scrollbar {
+    width: 5px; /* Adjust width for vertical scrollbar */
+    height: 8px; /* Adjust height for horizontal scrollbar */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); /* Gradient for a sleek look */
+    border-radius: 5px; /* Rounded edges */
+    border: 1px solid transparent; /* Space around the thumb */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); /* Subtle hover effect */
+    width: 8px; /* Adjust width for vertical scrollbar */
+    height: 8px; /* Adjust height for horizontal scrollbar */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f4f4f4; /* Light background for the track */
+    border-radius: 5px; /* Match the thumb's roundness */
+  }
+
+  /* Fallback for non-WebKit browsers */
+  .scroll-container {
+    scrollbar-color: var(--color-primary) var(--color-secondary); /* Thumb color, track color */
+    scrollbar-width: thin; /* Slim scrollbar */
+  }
+
+}
