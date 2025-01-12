@@ -15,7 +15,6 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PaperDistort } from '@/src/components/paper-distort.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TAG_OPTIONS, TAGS } from '@/src/constants/tags.ts';
 import { useQuill } from 'react-quilljs';
@@ -34,7 +33,6 @@ import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-imag
 import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
 import { useAppSelector } from '@/src/stores/store.ts';
 import { faArrowLeft, faDroplet } from '@fortawesome/free-solid-svg-icons';
-import background from '@/src/assets/images/plant-background.webp';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -284,14 +282,10 @@ export function PlantMinderDetailPage() {
           </ActionIcon>
         </Link>
         <Paper
+          className={'flex w-full flex-col p-4'}
           style={{
-            filter:
-              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-            viewTransitionName: 'bg',
+            filter: 'drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
           }}
-          className={
-            'relative flex w-full items-center flex-col box-border p-4 mb-4'
-          }
         >
           <div
             className={
@@ -349,15 +343,7 @@ export function PlantMinderDetailPage() {
               </ActionIcon>
             </Group>
           </Group>
-        </Paper>
-        <div className={'horizontal-divider bg-primary-800'}></div>
-        <Paper
-          className={'flex w-full flex-col p-4'}
-          style={{
-            filter:
-              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-          }}
-        >
+          <div className={'horizontal-divider h-1 bg-primary-800'}></div>
           <MultiSelect
             placeholder="Add a tag..."
             onChange={(data: string[]) => {
@@ -366,21 +352,13 @@ export function PlantMinderDetailPage() {
                 tags: data,
               });
             }}
+            className={'mb-4'}
             value={editableFields.tags}
             data={TAG_OPTIONS}
             renderOption={renderMultiSelectOption}
           />
-          <div className={'horizontal-divider bg-primary-800 my-4'}></div>
           <div className="min-h-40 w-full" ref={quillRef} />
-        </Paper>
-        <div className={'horizontal-divider bg-primary-800'}></div>
-        <Paper
-          style={{
-            filter:
-              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-          }}
-          className={'flex w-full items-center flex-col box-border p-4'}
-        >
+          <div className={'horizontal-divider h-1 bg-primary-800'}></div>
           <div className={'flex flex-col items-center md:flex-row w-full'}>
             <ImageManager plant={data}></ImageManager>
             <div
@@ -423,15 +401,7 @@ export function PlantMinderDetailPage() {
               </div>
             </div>
           </div>
-        </Paper>
-        <div className={'horizontal-divider bg-primary-800'}></div>
-        <Paper
-          className={'flex w-full flex-col p-4'}
-          style={{
-            filter:
-              'url(#paper-filter) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
-          }}
-        >
+          <div className={'horizontal-divider bg-primary-800'}></div>
           <Group justify={'flex-end'}>
             <Button
               color={'red'}
@@ -441,7 +411,6 @@ export function PlantMinderDetailPage() {
             </Button>
           </Group>
         </Paper>
-        <PaperDistort filterId={'paper-filter'}></PaperDistort>
       </div>
     </div>
   );

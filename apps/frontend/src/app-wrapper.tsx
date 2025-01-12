@@ -115,7 +115,7 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
           'fixed pointer-events-none opacity-70 w-full h-full top-0 left-0 object-cover'
         }
       ></Image>
-      <div className={'h-48'}></div>
+      <div className={'h-32'}></div>
       <div
         style={getImageStyle()}
         className={'flex items-center flex-initial justify-center'}
@@ -126,7 +126,7 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
       </div>
       <div
         className={
-          'flex-grow w-[1024px] slg-scrollbar max-w-5xl overflow-y-auto '
+          'flex-1 w-[1024px] max-w-full slg-scrollbar max-w-5xl overflow-y-auto '
         }
       >
         {children}
