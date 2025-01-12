@@ -124,7 +124,11 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
           <Image src={logo} className={'h-full w-full object-contain'}></Image>
         </Link>
       </div>
-      <div className={'flex-grow  slg-scrollbar overflow-y-auto '}>
+      <div
+        className={
+          'flex-grow w-[1024px] slg-scrollbar max-w-5xl overflow-y-auto '
+        }
+      >
         {children}
       </div>
       <div className={'h-48 relative flex-initial'}>

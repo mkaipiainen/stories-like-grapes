@@ -141,6 +141,10 @@ body {
   .vertical-divider {
     @apply h-full w-0.5 mx-4;
   }
+
+  .action-icon {
+    @apply p-4 rounded-full cursor-pointer transition w-4 h-full flex items-center justify-center bg-background-primary hover:bg-background-primary-700;
+  }
 }
 
 

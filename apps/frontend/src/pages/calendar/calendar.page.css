@@ -1,0 +1,26 @@
+.calendar-container {
+  display: grid;
+  grid-template-rows: minmax(300px, 500px) auto;
+  grid-template-columns: 2fr 5fr;
+  grid-template-areas: 'small large'
+                       'small large'
+                       'small large'
+                       'small large';
+  .small-calendar {
+    grid-area: small;
+  }
+
+  .main-calendar {
+    grid-area: large;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .calendar-container {
+    grid-template-rows: minmax(300px, 500px) auto;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'small'
+      'large';
+  }
+}

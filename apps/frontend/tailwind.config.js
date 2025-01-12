@@ -5,6 +5,10 @@ export default {
     extend: {
       boxShadow: {
         action: '0px 2px 4px rgba(0, 0, 0, 0.3)',
+        right: '2px 0 4px rgba(0, 0, 0, 0.3)',
+        left: '-2px 0 4px rgba(0, 0, 0, 0.3)',
+        top: '0 -22px 4px rgba(0, 0, 0, 0.3)',
+        bottom: '0 2px 4px rgba(0, 0, 0, 0.3)',
       },
       colors: {
         primary: {
@@ -58,6 +62,7 @@ export default {
           300: 'var(--color-background-primary-300)',
           200: 'var(--color-background-primary-200)',
           100: 'var(--color-background-primary-100)',
+          border: 'var(--color-background-primary-border)',
         },
         'background-secondary': {
           DEFAULT: 'var(--color-background-secondary)',
