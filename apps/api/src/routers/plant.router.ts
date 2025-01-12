@@ -150,6 +150,7 @@ export default router({
     .query((opts) => {
       return db
         .selectFrom('audit')
+        .selectAll()
         .where('table_name', '=', 'plant')
         .where('entity_id', '=', opts.input.id)
         .execute();

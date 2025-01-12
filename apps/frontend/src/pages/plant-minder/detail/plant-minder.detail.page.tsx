@@ -13,6 +13,7 @@ import {
   Paper,
   Text,
   TextInput,
+  Title,
 } from '@mantine/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -33,6 +34,7 @@ import { UsePlantPlaceholderImage } from '@/src/hooks/use-plant-placeholder-imag
 import { UsePlantMood } from '@/src/hooks/use-plant-mood.tsx';
 import { useAppSelector } from '@/src/stores/store.ts';
 import { faArrowLeft, faDroplet } from '@fortawesome/free-solid-svg-icons';
+import { PlantLog } from './components/plant-log';
 
 export function PlantMinderDetailPage() {
   const trpcContext = trpc.useUtils();
@@ -44,6 +46,10 @@ export function PlantMinderDetailPage() {
 
   const { data, isLoading, isSuccess } = trpc.plant.get.useQuery(id ?? '');
   const lastWateredById = trpc.plant.getLastWateredById.useQuery(id ?? '');
+  const auditLogsQuery = trpc.plant.getAuditLog.useQuery({
+    id: id ?? '',
+    type: 'plant',
+  });
   const placeholderImage = UsePlantPlaceholderImage(data);
   const mood = UsePlantMood(data);
   const users = useAppSelector((state) => {
@@ -235,12 +241,12 @@ export function PlantMinderDetailPage() {
 
   const getWateringText = useCallback(() => {
     if (mood.daysUntilWatering > 0) {
-      return `Water in ${mood.daysUntilWatering} days`;
+      return `Next water in ${mood.daysUntilWatering} days`;
     } else {
       if (mood.daysSinceWatering > 0) {
-        return `Water today - ${mood.daysSinceWatering} overdue!`;
+        return `Needs water! (${mood.daysSinceWatering} days overdue)`;
       } else {
-        return 'Water today!';
+        return 'Needs water!';
       }
     }
   }, [mood]);
@@ -272,7 +278,7 @@ export function PlantMinderDetailPage() {
             variant="filled"
             size="xl"
             radius="xl"
-            aria-label="Delete"
+            aria-label="Back"
           >
             <FontAwesomeIcon
               size={'lg'}
@@ -287,6 +293,7 @@ export function PlantMinderDetailPage() {
             filter: 'drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.2))',
           }}
         >
+          {/* Status section */}
           <div
             className={
               'flex absolute top-0 right-0 items-center p-4 box-border'
@@ -309,41 +316,100 @@ export function PlantMinderDetailPage() {
               </div>
             )}
           </div>
-          <Group className={'w-full'}>
-            <Image
-              src={placeholderImage}
-              height={80}
-              alt="Plant image placeholder"
-              className={'object-contain h-32 w-32'}
-            />
-            <Group
-              className={'flex flex-grow flex-col items-start justify-center'}
-            >
-              <Text>{getWateringText()}</Text>
-              <Text size={'xs'}>
-                Last watered by <b>{lastWateredBy}</b> on{' '}
-                {data?.last_watered?.toLocaleDateString()}
-              </Text>
-            </Group>
-            <Group className={'flex flex-shrink flex-col'}>
-              <ActionIcon
-                color={'green'}
-                onClick={() => onDoWater()}
-                className={'shadow-action shadow-primary-foreground'}
-                variant="filled"
-                size="xl"
-                radius="xl"
-                aria-label="Delete"
+
+          {/* Main Info Section */}
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start">
+            {/* Image */}
+            <div className="w-full md:w-auto flex justify-center md:justify-start">
+              <Image
+                src={placeholderImage}
+                height={80}
+                alt="Plant image placeholder"
+                className={'object-contain h-32 w-32 flex-shrink-0'}
+              />
+            </div>
+
+            {/* Details */}
+            <div className="flex-grow w-full flex flex-col gap-4">
+              <TextInput
+                autoComplete="off"
+                onChange={(value) =>
+                  setEditableFields({
+                    ...editableFields,
+                    name: value.target.value,
+                  })
+                }
+                value={editableFields.name}
+                label={'Name'}
+                required={true}
+                size="md"
+              />
+
+              <div className="flex items-center justify-start">
+                <span className="text-nowrap mr-4 flex items-center">
+                  Water every{' '}
+                </span>
+                <NumberInput
+                  className={'mr-4 w-24 flex items-center'}
+                  value={editableFields.watering_frequency}
+                  min={0}
+                  max={undefined}
+                  onChange={(value) => {
+                    setEditableFields({
+                      ...editableFields,
+                      watering_frequency: AsNumber(value),
+                    });
+                  }}
+                  required={true}
+                  size="sm"
+                />
+                <span className={'flex items-center'}>days</span>
+              </div>
+
+              <Group
+                gap={0}
+                justify={'flex-start'}
+                className="flex flex-wrap items-center"
               >
-                <FontAwesomeIcon
-                  size={'lg'}
-                  color={'white'}
-                  icon={faDroplet}
-                ></FontAwesomeIcon>
-              </ActionIcon>
-            </Group>
-          </Group>
-          <div className={'horizontal-divider h-1 bg-primary-800'}></div>
+                <Group
+                  gap={0}
+                  justify={'flex-start'}
+                  align={'flex-start'}
+                  className={'flex flex-col mr-4'}
+                >
+                  <Text className="font-medium" c={'color-danger'} size="md">
+                    {getWateringText()}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    Last watered by <b>{lastWateredBy}</b> on{' '}
+                    {data?.last_watered?.toLocaleDateString()}
+                  </Text>
+                </Group>
+                <ActionIcon
+                  color={'green'}
+                  onClick={() => onDoWater()}
+                  className={'shadow-action shadow-primary-foreground'}
+                  variant="filled"
+                  size="lg"
+                  radius="xl"
+                  aria-label="Water plant"
+                >
+                  <FontAwesomeIcon
+                    size={'lg'}
+                    color={'white'}
+                    icon={faDroplet}
+                  ></FontAwesomeIcon>
+                </ActionIcon>
+              </Group>
+            </div>
+          </div>
+
+          <div className={'horizontal-divider h-1 bg-primary-800 mt-4'}></div>
+
+          {/* Rest of your sections remain exactly the same */}
+          <Text className="font-medium mb-2 mt-4" size="sm">
+            Tags
+          </Text>
           <MultiSelect
             placeholder="Add a tag..."
             onChange={(data: string[]) => {
@@ -357,51 +423,35 @@ export function PlantMinderDetailPage() {
             data={TAG_OPTIONS}
             renderOption={renderMultiSelectOption}
           />
-          <div className="min-h-40 w-full" ref={quillRef} />
+
+          <Text className="font-medium mb-2" size="sm">
+            Notes
+          </Text>
+          <div className="min-h-40 w-full mb-4" ref={quillRef} />
+
           <div className={'horizontal-divider h-1 bg-primary-800'}></div>
-          <div className={'flex flex-col items-center md:flex-row w-full'}>
+
+          <div className="mt-4">
+            <Text className="font-medium mb-2" size="sm">
+              Images
+            </Text>
             <ImageManager plant={data}></ImageManager>
-            <div
-              className={
-                'horizontal-divider md:vertical-divider bg-primary-400'
-              }
-            ></div>
-            <div className={'flex flex-col basis-1/2 w-full'}>
-              <TextInput
-                autoComplete="off"
-                className={'p-4 w-full'}
-                onChange={(value) =>
-                  setEditableFields({
-                    ...editableFields,
-                    name: value.target.value,
-                  })
-                }
-                value={editableFields.name}
-                label={'Name'}
-                required={true}
-              ></TextInput>
-              <div className="flex items-center p-4">
-                <span className="text-nowrap mr-4 flex items-center">
-                  Water every{' '}
-                </span>
-                <NumberInput
-                  className={'mr-4 flex items-center'}
-                  value={editableFields.watering_frequency}
-                  min={0}
-                  max={undefined}
-                  onChange={(value) => {
-                    setEditableFields({
-                      ...editableFields,
-                      watering_frequency: AsNumber(value),
-                    });
-                  }}
-                  required={true}
-                ></NumberInput>
-                <span className={'flex items-center'}>days</span>
-              </div>
-            </div>
           </div>
-          <div className={'horizontal-divider bg-primary-800'}></div>
+
+          <div className={'horizontal-divider h-1 bg-primary-800 mt-4'}></div>
+
+          <div className="mt-4">
+            <PlantLog
+              logs={auditLogsQuery.data ?? []}
+              isLoading={auditLogsQuery.isLoading}
+            />
+          </div>
+
+          <div className={'horizontal-divider h-1 bg-primary-800 mt-4'}></div>
+
+          <Text className="font-medium mb-2 mt-4" size="sm">
+            Actions
+          </Text>
           <Group justify={'flex-end'}>
             <Button
               color={'red'}

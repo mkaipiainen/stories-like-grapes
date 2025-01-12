@@ -131,7 +131,7 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
       >
         {children}
       </div>
-      <div className={'h-48 relative flex-initial'}>
+      <div className={'h-24 relative flex-initial'}>
         <MainMenu></MainMenu>
       </div>
     </div>

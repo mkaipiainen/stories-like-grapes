@@ -8,6 +8,7 @@ import {
   LoadingOverlay,
   Modal,
   Text,
+  Stack,
 } from '@mantine/core';
 import { S3Image } from '@/src/components/s3-image.tsx';
 import { Dropzone, FileWithPath } from '@mantine/dropzone';
@@ -22,12 +23,20 @@ import { Carousel } from '@mantine/carousel';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
 import { notifications } from '@mantine/notifications';
-import { faClose } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faCamera, faImage } from '@fortawesome/free-solid-svg-icons';
 
 export function ImageManager(props: { plant: Plant | undefined }) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [
+    uploadDialogOpened,
+    { open: openUploadDialog, close: closeUploadDialog },
+  ] = useDisclosure(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const isMobileOrTablet =
+    /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
 
   const { doUpload, isUploadLoading } = UseFileUpload();
   const utils = trpc.useUtils();
@@ -86,6 +95,7 @@ export function ImageManager(props: { plant: Plant | undefined }) {
     const file = e.target.files?.[0];
     if (file) {
       doUploadImage([file]);
+      closeUploadDialog();
     }
   }
 
@@ -103,27 +113,18 @@ export function ImageManager(props: { plant: Plant | undefined }) {
   }
 
   const ImageUploadButton = () =>
-    isMobile ? (
-      <>
-        <ActionIcon
-          color="rgba(0, 0, 0, 0.4)"
-          variant="subtle"
-          radius="xl"
-          size="xl"
-          aria-label="Add an image"
-          className="relative h-16 w-16 rounded-full"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <AddAPhotoOutlinedIcon fontSize="large" />
-        </ActionIcon>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          accept="image/*"
-          className="hidden"
-        />
-      </>
+    isMobileOrTablet ? (
+      <ActionIcon
+        color="rgba(0, 0, 0, 0.4)"
+        variant="subtle"
+        radius="xl"
+        size="xl"
+        aria-label="Add an image"
+        className="relative h-16 w-16 rounded-full"
+        onClick={openUploadDialog}
+      >
+        <AddAPhotoOutlinedIcon fontSize="large" />
+      </ActionIcon>
     ) : (
       <Dropzone className="rounded-full" onDrop={doUploadImage}>
         <Dropzone.Idle>
@@ -141,9 +142,84 @@ export function ImageManager(props: { plant: Plant | undefined }) {
       </Dropzone>
     );
 
+  const SmallImageUploadButton = () =>
+    isMobileOrTablet ? (
+      <ActionIcon
+        color="rgba(0, 0, 0, 0.4)"
+        variant="subtle"
+        radius="lg"
+        size="lg"
+        aria-label="Add an image"
+        onClick={openUploadDialog}
+      >
+        <AddAPhotoOutlinedIcon />
+      </ActionIcon>
+    ) : (
+      <Dropzone
+        className="rounded-full h-12 w-12 flex items-center justify-center"
+        onDrop={doUploadImage}
+      >
+        <Dropzone.Idle>
+          <ActionIcon
+            color="rgba(0, 0, 0, 0.4)"
+            variant="subtle"
+            radius="lg"
+            size="lg"
+            aria-label="Add an image"
+            className="relative"
+          >
+            <AddAPhotoOutlinedIcon />
+          </ActionIcon>
+        </Dropzone.Idle>
+      </Dropzone>
+    );
+
   return (
     <>
       {!props.plant ? <LoadingOverlay /> : null}
+      {isMobileOrTablet && (
+        <Modal
+          opened={uploadDialogOpened}
+          onClose={closeUploadDialog}
+          title="Add Image"
+          centered
+          size="sm"
+        >
+          <Stack>
+            <Button
+              leftSection={<FontAwesomeIcon icon={faCamera} />}
+              onClick={() => cameraInputRef.current?.click()}
+              variant="light"
+              fullWidth
+            >
+              Take Photo
+            </Button>
+            <Button
+              leftSection={<FontAwesomeIcon icon={faImage} />}
+              onClick={() => fileInputRef.current?.click()}
+              variant="light"
+              fullWidth
+            >
+              Choose from Gallery
+            </Button>
+          </Stack>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={cameraInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+          />
+        </Modal>
+      )}
       <Group className="basis-1/2 h-40 max-h-40" wrap="nowrap">
         <div className="relative" style={{ viewTransitionName: 'plant-image' }}>
           {images.mainImage ? (
@@ -183,45 +259,7 @@ export function ImageManager(props: { plant: Plant | undefined }) {
           {isUploadLoading ? (
             <Loader type="bars" size="sm" />
           ) : images.mainImage ? (
-            isMobile ? (
-              <>
-                <ActionIcon
-                  color="rgba(0, 0, 0, 0.4)"
-                  variant="subtle"
-                  radius="lg"
-                  size="lg"
-                  aria-label="Add an image"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <AddAPhotoOutlinedIcon />
-                </ActionIcon>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  accept="image/*"
-                  className="hidden"
-                />
-              </>
-            ) : (
-              <Dropzone
-                className="rounded-full h-12 w-12 flex items-center justify-center"
-                onDrop={doUploadImage}
-              >
-                <Dropzone.Idle>
-                  <ActionIcon
-                    color="rgba(0, 0, 0, 0.4)"
-                    variant="subtle"
-                    radius="lg"
-                    size="lg"
-                    aria-label="Add an image"
-                    className="relative"
-                  >
-                    <AddAPhotoOutlinedIcon />
-                  </ActionIcon>
-                </Dropzone.Idle>
-              </Dropzone>
-            )
+            <SmallImageUploadButton />
           ) : null}
         </Group>
       </Group>

@@ -6,7 +6,7 @@ export function PlantMinderPage() {
   return (
     <div
       className={
-        'flex flex-col h-full w-full max-w-5xl relative overflow-y-scroll'
+        'flex flex-col h-full w-full max-w-5xl relative overflow-y-auto'
       }
     >
       <Image
