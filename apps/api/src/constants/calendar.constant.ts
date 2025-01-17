@@ -1,13 +1,5 @@
+// constants/calendar.constant.ts
 import { z } from 'zod';
-
-export const CALENDAR_PERMISSION_LEVEL = {
-  VIEW: 'view',
-  EDIT: 'edit',
-  ADMIN: 'admin',
-} as const;
-
-export type CalendarPermissionLevel =
-  (typeof CALENDAR_PERMISSION_LEVEL)[keyof typeof CALENDAR_PERMISSION_LEVEL];
 
 export const EVENT_STATUS = {
   PENDING: 'pending',
@@ -26,12 +18,7 @@ export const CALENDAR_PROVIDER = {
 export type CalendarProvider =
   (typeof CALENDAR_PROVIDER)[keyof typeof CALENDAR_PROVIDER];
 
-export const ZodCalendarPermissionLevel = z.enum([
-  CALENDAR_PERMISSION_LEVEL.VIEW,
-  CALENDAR_PERMISSION_LEVEL.EDIT,
-  CALENDAR_PERMISSION_LEVEL.ADMIN,
-]);
-
+// Zod schemas for validation
 export const ZodEventStatus = z.enum([
   EVENT_STATUS.PENDING,
   EVENT_STATUS.ACCEPTED,

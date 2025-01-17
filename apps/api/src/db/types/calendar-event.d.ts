@@ -3,7 +3,6 @@ import { ColumnType, Generated, Selectable } from 'kysely';
 
 export type CalendarEventTable = {
   id: Generated<string>;
-  calendar_id: string;
   title: string;
   description: string | null;
   start_time: ColumnType<Date, string, string>;

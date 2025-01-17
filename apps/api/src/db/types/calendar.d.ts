@@ -5,7 +5,7 @@ export type CalendarTable = {
   id: Generated<string>;
   name: string;
   description: string | null;
-  tenant_id: string;
+  user_id: string;
   provider_type: string | null;
   provider_calendar_id: string | null;
   date_created: ColumnType<Date, never, never>;

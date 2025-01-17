@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/auth.slice';
+import tenantReducer from './slices/tenant.slice';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 export const store = configureStore({
   reducer: {
     authReducer,
+    tenantReducer,
   },
 });
 // Get the type of our store variable

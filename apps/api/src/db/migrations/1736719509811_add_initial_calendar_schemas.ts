@@ -9,21 +9,18 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .addColumn('name', 'varchar', (col) => col.notNull())
     .addColumn('description', 'text')
-    .addColumn('tenant_id', 'varchar', (col) => col.notNull())
+    .addColumn('user_id', 'varchar', (col) => col.notNull())
     .addColumn('provider_type', 'varchar')
     .addColumn('provider_calendar_id', 'varchar')
     .addColumn('date_created', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .addColumn('date_updated', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .execute();
 
-  // Calendar Event table
+  // Calendar Event table (no direct calendar reference)
   await db.schema
     .createTable('calendar_event')
     .addColumn('id', 'varchar', (col) =>
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
-    )
-    .addColumn('calendar_id', 'varchar', (col) =>
-      col.references('calendar.id').onDelete('cascade').notNull(),
     )
     .addColumn('title', 'varchar', (col) => col.notNull())
     .addColumn('description', 'text')
@@ -36,21 +33,22 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('date_updated', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .execute();
 
-  // Calendar Share table
+  // Calendar Event Calendar join table (new!)
   await db.schema
-    .createTable('calendar_share')
+    .createTable('calendar_event_calendar')
     .addColumn('id', 'varchar', (col) =>
       col.primaryKey().defaultTo(sql`gen_random_uuid()`),
     )
     .addColumn('calendar_id', 'varchar', (col) =>
       col.references('calendar.id').onDelete('cascade').notNull(),
     )
-    .addColumn('user_id', 'varchar', (col) => col.notNull())
-    .addColumn('permission_level', 'varchar', (col) => col.notNull())
+    .addColumn('event_id', 'varchar', (col) =>
+      col.references('calendar_event.id').onDelete('cascade').notNull(),
+    )
     .addColumn('date_created', 'timestamp', (col) => col.defaultTo(sql`now()`))
     .execute();
 
-  // Calendar Event User table
+  // Calendar Event User table (for participation status)
   await db.schema
     .createTable('calendar_event_user')
     .addColumn('id', 'varchar', (col) =>
@@ -66,15 +64,9 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   // Create indices
   await db.schema
-    .createIndex('calendar_tenant_id_idx')
+    .createIndex('calendar_user_id_idx')
     .on('calendar')
-    .column('tenant_id')
-    .execute();
-
-  await db.schema
-    .createIndex('calendar_event_calendar_id_idx')
-    .on('calendar_event')
-    .column('calendar_id')
+    .column('user_id')
     .execute();
 
   await db.schema
@@ -84,9 +76,9 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute();
 
   await db.schema
-    .createIndex('calendar_share_calendar_id_user_id_idx')
-    .on('calendar_share')
-    .columns(['calendar_id', 'user_id'])
+    .createIndex('calendar_event_calendar_idx')
+    .on('calendar_event_calendar')
+    .columns(['calendar_id', 'event_id'])
     .execute();
 
   await db.schema
@@ -98,7 +90,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 export async function down(db: Kysely<any>): Promise<void> {
   await db.schema.dropTable('calendar_event_user').execute();
-  await db.schema.dropTable('calendar_share').execute();
+  await db.schema.dropTable('calendar_event_calendar').execute();
   await db.schema.dropTable('calendar_event').execute();
   await db.schema.dropTable('calendar').execute();
 }

@@ -2,6 +2,10 @@ import { router } from '../trpc';
 import { protectedProcedure } from '../procedures/protected.procedure';
 import { authService } from '../services/auth.service';
 import type { RawUser } from '../db/types/auth';
+import { db } from '../db/db';
+import { TENANT_ENTITY_TYPE } from '../constants/entity.constant';
+import { TENANT_ROLES } from '../constants/tenant.constant';
+import { GUID } from '../util/guid';
 
 export const authRouter = router({
   list: protectedProcedure.query(async () => {
@@ -41,6 +45,55 @@ export const authRouter = router({
     } catch (e) {
       console.log(e);
       return [];
+    }
+  }),
+  initUserData: protectedProcedure.mutation(async (opts) => {
+    const user = opts.ctx.user;
+    const existingTenant = await db
+      .selectFrom('tenant_entity')
+      .select('id')
+      .where('entity_id', '=', opts.ctx.userId)
+      .where('entity_type', '=', TENANT_ENTITY_TYPE.USER)
+      .executeTakeFirst();
+    console.log('CALLING', user);
+
+    if (!existingTenant) {
+      const tenant = await db
+        .insertInto('tenant')
+        .values({
+          name: GUID(),
+        })
+        .onConflict()
+        .returningAll()
+        .executeTakeFirst();
+      console.log(tenant);
+      if (!tenant) {
+        console.error('Failed to create a tenant for a user');
+      } else {
+        await db
+          .insertInto('tenant_entity')
+          .values({
+            entity_type: TENANT_ENTITY_TYPE.USER,
+            entity_id: opts.ctx.userId,
+            role: TENANT_ROLES.owner,
+            tenant_id: tenant.id,
+          })
+          .execute();
+      }
+    }
+    const existingCalendar = await db
+      .selectFrom('calendar')
+      .select('id')
+      .where('user_id', '=', opts.ctx.userId)
+      .executeTakeFirst();
+    if (!existingCalendar) {
+      await db
+        .insertInto('calendar')
+        .values({
+          user_id: opts.ctx.userId,
+          name: `${user.name}'s Calendar`,
+        })
+        .execute();
     }
   }),
 });

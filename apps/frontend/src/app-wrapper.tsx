@@ -7,7 +7,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Image } from '@mantine/core';
 import logo from '@/src/assets/images/logo.webp';
 import bgImage from '@/src/assets/images/background.webp';
+import { setTenants } from '@/src/stores/slices/tenant.slice.ts';
 export const AppWrapper: FC<{ children: any }> = ({ children }) => {
+  const initDataMutator = trpc.auth.initUserData.useMutation({
+    onSuccess: () => {},
+  });
+  const tenants = trpc.tenant.listForUser.useQuery();
   const subscriptionMutator = trpc.sub.subscribe.useMutation();
   const location = useLocation();
   const users = trpc.auth.list.useQuery();
@@ -17,6 +22,18 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
       dispatch(setUsers(users.data));
     }
   }, [users.data, users.isSuccess]);
+  useEffect(() => {
+    if (tenants.isSuccess) {
+      dispatch(setTenants(tenants.data));
+    }
+  }, [tenants.data, tenants.isSuccess]);
+  useEffect(() => {
+    console.log(initDataMutator.isIdle);
+    console.log(initDataMutator.isPending);
+    if (!initDataMutator.isPending) {
+      initDataMutator.mutate();
+    }
+  }, []);
   useEffect(() => {
     // Ask for permission
     if ('Notification' in window && Notification.permission === 'default') {

@@ -7,8 +7,9 @@ import type { NotificationTable } from './notification';
 import type { AuditTable } from './audit';
 import type { CalendarEventUserTable } from './calendar-event-user';
 import type { CalendarEventTable } from './calendar-event';
-import type { CalendarShareTable } from './calendar-share';
 import type { CalendarTable } from './calendar';
+import type { TenantEntityTable } from './tenant-entity';
+import type { CalendarEventCalendarTable } from './calendar-event-calendar';
 
 export type Database = {
   plant: PlantTable;
@@ -16,11 +17,12 @@ export type Database = {
   tag: TagTable;
   subscription: SubscriptionTable;
   tenant: TenantTable;
+  tenant_entity: TenantEntityTable;
   notification: NotificationTable;
   audit: AuditTable;
   calendar: CalendarTable;
   calendar_event: CalendarEventTable;
-  calendar_share: CalendarShareTable;
+  calendar_event_calendar: CalendarEventCalendarTable;
   calendar_event_user: CalendarEventUserTable;
 };
 
