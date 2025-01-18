@@ -1,3 +1,5 @@
+import type { RawUser } from '../db/types/auth';
+
 function AuthService() {
   async function getManagementApiToken() {
     const domain = process.env.AUTH0_DOMAIN; // e.g. "YOUR_TENANT.us.auth0.com"
@@ -32,8 +34,45 @@ function AuthService() {
     return data.access_token; // Bearer token
   }
 
+  async function getUser(userId: string) {
+    const token = await getManagementApiToken();
+    const domain = process.env.AUTH0_DOMAIN;
+
+    try {
+      const response = await fetch(`https://${domain}/api/v2/users/${userId}`, {
+        method: 'GET',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch user. Status Code: ${response.status}`,
+        );
+      }
+
+      const user = (await response.json()) as RawUser;
+      return {
+        id: user.user_id,
+        name: user.name,
+        picture: user.picture,
+        last_login: user.last_login,
+        created_at: user.created_at,
+        email_verified: user.email_verified,
+        nickname: user.nickname,
+        email: user.email,
+      };
+    } catch (e) {
+      console.error('Error fetching user:', e);
+      throw e;
+    }
+  }
+
   return {
     getManagementApiToken,
+    getUser,
   };
 }
 

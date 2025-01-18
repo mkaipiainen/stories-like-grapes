@@ -47,53 +47,65 @@ export const authRouter = router({
       return [];
     }
   }),
+  me: protectedProcedure.query(async (opts) => {
+    try {
+      return await authService.getUser(opts.ctx.userId);
+    } catch (e) {
+      console.error('Error fetching current user:', e);
+      throw e;
+    }
+  }),
   initUserData: protectedProcedure.mutation(async (opts) => {
-    const user = opts.ctx.user;
-    const existingTenant = await db
-      .selectFrom('tenant_entity')
-      .select('id')
-      .where('entity_id', '=', opts.ctx.userId)
-      .where('entity_type', '=', TENANT_ENTITY_TYPE.USER)
-      .executeTakeFirst();
-    console.log('CALLING', user);
-
-    if (!existingTenant) {
-      const tenant = await db
-        .insertInto('tenant')
-        .values({
-          name: GUID(),
-        })
-        .onConflict()
-        .returningAll()
+    const user = await authService.getUser(opts.ctx.userId);
+    return await db.transaction().execute(async (trx) => {
+      const defaultTenant = await trx
+        .selectFrom('tenant')
+        .selectAll()
+        .where('is_default', '=', true)
+        .where('created_by', '=', opts.ctx.userId)
+        .forUpdate()
         .executeTakeFirst();
-      console.log(tenant);
-      if (!tenant) {
-        console.error('Failed to create a tenant for a user');
-      } else {
-        await db
-          .insertInto('tenant_entity')
+
+      if (!defaultTenant) {
+        const tenant = await trx
+          .insertInto('tenant')
           .values({
-            entity_type: TENANT_ENTITY_TYPE.USER,
-            entity_id: opts.ctx.userId,
-            role: TENANT_ROLES.owner,
-            tenant_id: tenant.id,
+            name: `${user.name}'s Default Tenant`,
+            is_default: true,
+            created_by: opts.ctx.userId,
+          })
+          .returningAll()
+          .executeTakeFirst();
+
+        if (!tenant) {
+          console.error('Failed to create a tenant for a user');
+        } else {
+          await trx
+            .insertInto('tenant_entity')
+            .values({
+              entity_type: TENANT_ENTITY_TYPE.USER,
+              entity_id: opts.ctx.userId,
+              role: TENANT_ROLES.owner,
+              tenant_id: tenant.id,
+            })
+            .execute();
+        }
+      }
+      const existingCalendar = await db
+        .selectFrom('calendar')
+        .select('id')
+        .where('user_id', '=', opts.ctx.userId)
+        .forUpdate()
+        .executeTakeFirst();
+      if (!existingCalendar) {
+        await db
+          .insertInto('calendar')
+          .values({
+            user_id: opts.ctx.userId,
+            name: `${user.name}'s Calendar`,
           })
           .execute();
       }
-    }
-    const existingCalendar = await db
-      .selectFrom('calendar')
-      .select('id')
-      .where('user_id', '=', opts.ctx.userId)
-      .executeTakeFirst();
-    if (!existingCalendar) {
-      await db
-        .insertInto('calendar')
-        .values({
-          user_id: opts.ctx.userId,
-          name: `${user.name}'s Calendar`,
-        })
-        .execute();
-    }
+    });
   }),
 });

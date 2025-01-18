@@ -28,11 +28,17 @@ export const AppWrapper: FC<{ children: any }> = ({ children }) => {
     }
   }, [tenants.data, tenants.isSuccess]);
   useEffect(() => {
-    console.log(initDataMutator.isIdle);
-    console.log(initDataMutator.isPending);
+    let isCancelled = false;
+
     if (!initDataMutator.isPending) {
-      initDataMutator.mutate();
+      if (!isCancelled) {
+        initDataMutator.mutate();
+      }
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
   useEffect(() => {
     // Ask for permission

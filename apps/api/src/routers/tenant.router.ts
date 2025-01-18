@@ -39,6 +39,7 @@ export const tenantRouter = router({
         .insertInto('tenant')
         .values({
           name: opts.input.name,
+          created_by: opts.ctx.userId,
         })
         .returningAll()
         .executeTakeFirstOrThrow();
